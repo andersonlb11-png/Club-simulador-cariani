@@ -406,7 +406,7 @@ function renderPlanosInputs(){
       </div>
       <label class="lbl">Preço mensal (R$) — kit trimestral = × 3</label>
       <div class="sl-row">
-        <input type="range" min="50" max="1000" step="1" value="${p.preco_mensal}" oninput="PL[${i}].preco_mensal=parseInt(this.value);document.getElementById('pv${i}').textContent=fmt(this.value)+'/mês';document.getElementById('tv${i}').textContent='= '+fmt(this.value*3)+'/tri';calc()">
+        <input type="range" min="50" max="2000" step="5" value="${p.preco_mensal}" oninput="PL[${i}].preco_mensal=parseInt(this.value);document.getElementById('pv${i}').textContent=fmt(this.value)+'/mês';document.getElementById('tv${i}').textContent='= '+fmt(this.value*3)+'/tri';calc()">
         <span class="sl-val gold" id="pv${i}">${fmt(p.preco_mensal)}/mês</span>
       </div>
       <div style="font-size:12px;color:var(--gold);font-weight:700;margin-top:6px;text-align:right" id="tv${i}">= ${fmt(p.preco_mensal*3)}/tri</div>
