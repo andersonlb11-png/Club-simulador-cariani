@@ -5,33 +5,34 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Simulador Financeiro Cariani — Anabolic Food</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.5.0/dist/tabler-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --rc:#E8242A;--gold:#F5A623;--green:#22C55E;--yellow:#EAB308;--blue:#378ADD;
+  --rc:#E8242A;--gold:#F5A623;--green:#22C55E;--yellow:#EAB308;--blue:#378ADD;--purple:#A855F7;
   --s0:#141414;--s1:#1C1C1C;--s2:#252525;--s3:#2F2F2F;--s4:#3A3A3A;
   --t1:#F2F2F2;--t2:#909090;
   --bdr:rgba(255,255,255,0.09);--rad:12px;--rad-sm:8px;
 }
 body{background:var(--s0);min-height:100vh;font-family:system-ui,-apple-system,sans-serif;color:var(--t1);padding:1rem}
 .app{max-width:720px;margin:0 auto;padding-bottom:3rem}
-.hdr{background:var(--s1);border:1px solid var(--bdr);border-radius:var(--rad);padding:1rem 1.5rem;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.hdr{background:var(--s1);border:1px solid var(--bdr);border-radius:var(--rad);padding:1rem 1.5rem;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .hdr-txt h1{font-size:20px;font-weight:800;letter-spacing:-0.5px}
 .hdr-txt h1 span{color:var(--rc)}
 .hdr-txt p{font-size:12px;color:var(--t2);margin-top:3px}
 .hdr-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
 .badge{background:var(--rc);color:#fff;font-size:9px;font-weight:800;padding:4px 10px;border-radius:20px;letter-spacing:1px;white-space:nowrap}
-.save-bar{display:flex;gap:6px;align-items:center}
-.btn-save{background:var(--green);color:#fff;font-size:11px;font-weight:800;padding:8px 16px;border-radius:var(--rad-sm);cursor:pointer;border:none;display:flex;align-items:center;gap:5px;white-space:nowrap;transition:opacity .15s}
-.btn-save:active{opacity:.75}
-.btn-reset{background:transparent;color:var(--t2);font-size:11px;font-weight:700;padding:8px 12px;border-radius:var(--rad-sm);cursor:pointer;border:1px solid var(--bdr);display:flex;align-items:center;gap:4px;transition:all .15s}
-.btn-reset:hover{border-color:var(--rc);color:var(--rc)}
+.save-bar{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.btn-save{background:var(--green);color:#fff;font-size:11px;font-weight:800;padding:8px 14px;border-radius:var(--rad-sm);cursor:pointer;border:none;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.btn-pitch{background:var(--purple);color:#fff;font-size:11px;font-weight:800;padding:8px 14px;border-radius:var(--rad-sm);cursor:pointer;border:none;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.btn-pdf{background:var(--blue);color:#fff;font-size:11px;font-weight:800;padding:8px 14px;border-radius:var(--rad-sm);cursor:pointer;border:none;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.btn-reset{background:transparent;color:var(--t2);font-size:11px;font-weight:700;padding:8px 12px;border-radius:var(--rad-sm);cursor:pointer;border:1px solid var(--bdr);display:flex;align-items:center;gap:4px}
 .save-status{font-size:10px;height:20px;display:flex;align-items:center;gap:5px}
 .save-status.ok{color:var(--green)}.save-status.saving{color:var(--gold)}.save-status.err{color:var(--rc)}
 .nav{display:flex;gap:0;margin-bottom:1rem;background:var(--s1);border:1px solid var(--bdr);border-radius:var(--rad);padding:4px;overflow-x:auto}
 .nav::-webkit-scrollbar{display:none}
-.ntab{flex:1;min-width:0;background:transparent;border:none;color:var(--t2);font-size:11px;font-weight:700;padding:9px 6px;border-radius:var(--rad-sm);cursor:pointer;transition:all .15s;white-space:nowrap;text-align:center;display:flex;flex-direction:column;align-items:center;gap:3px}
-.ntab i{font-size:18px}
+.ntab{flex:1;min-width:0;background:transparent;border:none;color:var(--t2);font-size:10px;font-weight:700;padding:8px 4px;border-radius:var(--rad-sm);cursor:pointer;transition:all .15s;white-space:nowrap;text-align:center;display:flex;flex-direction:column;align-items:center;gap:2px}
+.ntab i{font-size:16px}
 .ntab.on{background:var(--rc);color:#fff}
 .sec{display:none}.sec.on{display:block}
 .card{background:var(--s1);border:1px solid var(--bdr);border-radius:var(--rad);padding:1.25rem 1.5rem;margin-bottom:.85rem}
@@ -54,14 +55,13 @@ label.lbl:first-of-type{margin-top:0}
 .tsl:before{content:'';position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:white;border-radius:50%;transition:.25s}
 input:checked+.tsl{background:var(--rc)}
 input:checked+.tsl:before{transform:translateX(18px)}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
 .kpi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem;margin-bottom:.85rem}
 @media(min-width:500px){.kpi-grid{grid-template-columns:repeat(4,1fr)}.acc-grid{grid-template-columns:repeat(4,1fr)!important}}
 .kpi{background:var(--s2);border-radius:var(--rad-sm);padding:.9rem 1rem}
 .kpi .k-lbl{font-size:10px;color:var(--t2);font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:5px}
 .kpi .k-val{font-size:20px;font-weight:900;line-height:1}
 .kpi .k-sub{font-size:10px;color:var(--t2);margin-top:3px}
-.k-val.g{color:var(--green)}.k-val.r{color:var(--rc)}.k-val.gold{color:var(--gold)}.k-val.bl{color:var(--blue)}
+.k-val.g{color:var(--green)}.k-val.r{color:var(--rc)}.k-val.gold{color:var(--gold)}.k-val.bl{color:var(--blue)}.k-val.pu{color:var(--purple)}
 .res-box{background:var(--s2);border:1.5px solid var(--rc);border-radius:var(--rad);padding:1.5rem;text-align:center;margin-bottom:.85rem}
 .res-box .rt{font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--t2);margin-bottom:8px}
 .res-box .rv{font-size:38px;font-weight:900;letter-spacing:-1px}
@@ -107,7 +107,7 @@ input:checked+.tsl:before{transform:translateX(18px)}
 .ciclo-tabs{display:flex;gap:6px;margin-bottom:.85rem;flex-wrap:wrap}
 .ctab{background:var(--s3);border:1px solid var(--bdr);color:var(--t2);font-size:11px;font-weight:700;padding:8px 10px;border-radius:var(--rad-sm);cursor:pointer;flex:1;text-align:center;min-width:70px;transition:all .15s}
 .ctab.on{background:var(--rc);border-color:var(--rc);color:#fff}
-.inv-row{display:grid;grid-template-columns:65px 1fr 1fr 1fr 1fr;gap:6px;align-items:center;padding:9px 0;border-bottom:1px solid var(--bdr);font-size:11px}
+.inv-row{display:grid;grid-template-columns:65px 1fr 1fr 1fr 1fr 1fr;gap:6px;align-items:center;padding:9px 0;border-bottom:1px solid var(--bdr);font-size:11px}
 .inv-row:last-child{border-bottom:none}
 .inv-row.hdr{color:var(--t2);font-weight:700;font-size:10px;padding-bottom:6px}
 .inv-bar-bg{background:var(--s3);border-radius:3px;height:7px;overflow:hidden}
@@ -121,11 +121,45 @@ input:checked+.tsl:before{transform:translateX(18px)}
 .tip{display:flex;align-items:center;gap:8px;background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.2);border-radius:var(--rad-sm);padding:10px 14px;font-size:11px;color:var(--gold);margin-bottom:1rem;line-height:1.4}
 .plano-blk{background:var(--s2);border-radius:var(--rad-sm);padding:1rem;margin-bottom:.75rem}
 .plano-blk-title{font-size:10px;font-weight:800;color:var(--rc);margin-bottom:.85rem;letter-spacing:.5px}
+/* cenarios */
+.cen-tabs{display:flex;gap:6px;margin-bottom:1rem}
+.cen-tab{flex:1;padding:10px;border-radius:var(--rad-sm);border:1px solid var(--bdr);background:var(--s3);color:var(--t2);font-size:12px;font-weight:700;cursor:pointer;text-align:center;transition:all .15s}
+.cen-tab.pes.on{background:#7F1D1D;border-color:#EF4444;color:#FCA5A5}
+.cen-tab.rea.on{background:#1E3A5F;border-color:var(--blue);color:#93C5FD}
+.cen-tab.oti.on{background:#14532D;border-color:var(--green);color:#86EFAC}
+.cen-card{background:var(--s2);border-radius:var(--rad-sm);padding:1rem;margin-bottom:.75rem}
+.cen-card h4{font-size:11px;font-weight:800;margin-bottom:.75rem;display:flex;align-items:center;gap:6px}
+.cen-row{display:flex;justify-content:space-between;font-size:12px;padding:5px 0;border-bottom:1px solid var(--bdr)}
+.cen-row:last-child{border-bottom:none}
+.cen-row .lbl2{color:var(--t2)}
+/* breakeven */
+.be-box{background:var(--s2);border-radius:var(--rad);padding:1.25rem;margin-bottom:.85rem;text-align:center}
+.be-num{font-size:42px;font-weight:900;color:var(--gold)}
+.be-label{font-size:11px;color:var(--t2);margin-top:4px}
+/* modal overlay */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:9998;align-items:center;justify-content:center;padding:1rem}
+.modal-box{background:var(--s1);border:1px solid var(--bdr);border-radius:16px;padding:1.5rem;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.6)}
+.modal-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem}
+.modal-hdr h2{font-size:15px;font-weight:800}
+.modal-close{background:transparent;border:none;color:var(--t2);font-size:22px;cursor:pointer;line-height:1;padding:0}
+/* pitch */
+.pitch-section{margin-bottom:1.25rem}
+.pitch-section h3{font-size:11px;font-weight:800;color:var(--rc);letter-spacing:1px;text-transform:uppercase;margin-bottom:.5rem}
+.pitch-section p,.pitch-section li{font-size:13px;color:var(--t1);line-height:1.6}
+.pitch-section ul{padding-left:1.2rem}
+.pitch-kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin:.5rem 0}
+.pitch-kpi{background:var(--s2);border-radius:8px;padding:.7rem .9rem}
+.pitch-kpi .pk-v{font-size:18px;font-weight:900;color:var(--gold)}
+.pitch-kpi .pk-l{font-size:10px;color:var(--t2);margin-top:2px}
+.btn-copy{width:100%;background:var(--purple);color:#fff;border:none;border-radius:8px;padding:12px;font-size:13px;font-weight:800;cursor:pointer;margin-top:1rem;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-full{width:100%;color:#fff;border:none;border-radius:8px;padding:12px;font-size:13px;font-weight:800;cursor:pointer;margin-top:.5rem;display:flex;align-items:center;justify-content:center;gap:8px}
+/* toast */
 .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--s1);border:1px solid var(--bdr);border-radius:var(--rad);padding:12px 20px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;transition:transform .3s;z-index:9999;white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,.5)}
 .toast.show{transform:translateX(-50%) translateY(0)}
 .toast.ok{color:var(--green);border-color:rgba(34,197,94,.3)}
 .toast.err{color:var(--rc);border-color:rgba(232,36,42,.3)}
 footer{text-align:center;font-size:11px;color:var(--t2);margin-top:2rem;padding-top:1rem;border-top:1px solid var(--bdr)}
+@media print{.nav,.hdr-right,.toast,footer,button{display:none!important}.sec{display:block!important}body{background:#fff;color:#000;padding:0}.card{border:1px solid #ddd;break-inside:avoid}}
 </style>
 </head>
 <body>
@@ -137,9 +171,11 @@ footer{text-align:center;font-size:11px;color:var(--t2);margin-top:2rem;padding-
     <p>Anabolic Food × RC — War Room Financeira</p>
   </div>
   <div class="hdr-right">
-    <span class="badge">v9 · FINAL</span>
+    <span class="badge">v10 · PRO</span>
     <div class="save-bar">
       <button class="btn-reset" onclick="resetConfig()"><i class="ti ti-refresh"></i> Reset</button>
+      <button class="btn-pitch" onclick="openPitch()"><i class="ti ti-presentation"></i> Pitch</button>
+      <button class="btn-pdf" onclick="window.print()"><i class="ti ti-file-type-pdf"></i> PDF</button>
       <button class="btn-save" onclick="saveNow(true)"><i class="ti ti-device-floppy"></i> Salvar</button>
     </div>
     <div class="save-status ok" id="save_status"><i class="ti ti-cloud-check"></i><span>Pronto</span></div>
@@ -151,6 +187,7 @@ footer{text-align:center;font-size:11px;color:var(--t2);margin-top:2rem;padding-
   <button class="ntab" onclick="goSec('planos')"><i class="ti ti-layout-columns"></i>Planos</button>
   <button class="ntab" onclick="goSec('ondas')"><i class="ti ti-wave-sine"></i>Ondas</button>
   <button class="ntab" onclick="goSec('resultado')"><i class="ti ti-chart-line"></i>Resultado</button>
+  <button class="ntab" onclick="goSec('cenarios')"><i class="ti ti-adjustments"></i>Cenários</button>
 </div>
 
 <!-- CONFIG -->
@@ -170,11 +207,11 @@ footer{text-align:center;font-size:11px;color:var(--t2);margin-top:2rem;padding-
     <label class="lbl">Valor do frete por entrega (R$) — 3 fretes por ciclo</label>
     <input class="inp" type="number" id="frete" value="35" min="0" max="300" step="1" oninput="calc()">
     <div class="tog-row" style="margin-top:10px"><span class="tog-row-label">Taxa financeira / antecipação</span><label class="tog"><input type="checkbox" id="tog_taxa" checked onchange="calc()"><span class="tsl"></span></label></div>
-    <label class="lbl">Taxa financeira (% sobre faturamento)</label>
-    <div class="sl-row"><input type="range" id="taxa_fin" min="0" max="8" value="3.5" step="0.5" oninput="document.getElementById('taxa_v').textContent=parseFloat(this.value).toFixed(1)+'%';calc()"><span class="sl-val" id="taxa_v">3.5%</span></div>
-    <div class="tog-row" style="margin-top:10px"><span class="tog-row-label">Comissão Renato Cariani</span><label class="tog"><input type="checkbox" id="tog_rc" onchange="calc()"><span class="tsl"></span></label></div>
-    <label class="lbl">Comissão RC (% sobre faturamento)</label>
-    <div class="sl-row"><input type="range" id="com_rc" min="0" max="20" value="5" step="0.5" oninput="document.getElementById('com_rc_v').textContent=parseFloat(this.value).toFixed(1)+'%';calc()"><span class="sl-val" id="com_rc_v">5.0%</span></div>
+    <label class="lbl">Taxa financeira / antecipação (% sobre fat.)</label>
+    <div class="sl-row"><input type="range" id="taxa_fin" min="0" max="20" value="3.5" step="0.5" oninput="document.getElementById('taxa_v').textContent=parseFloat(this.value).toFixed(1)+'%';calc()"><span class="sl-val" id="taxa_v">3.5%</span></div>
+    <div style="display:flex;justify-content:flex-end;margin-top:14px">
+      <button onclick="document.getElementById('modal_parceria').style.display='flex'" style="background:transparent;border:1px solid rgba(255,255,255,0.07);border-radius:6px;color:rgba(255,255,255,0.18);font-size:10px;padding:5px 10px;cursor:pointer">⚙</button>
+    </div>
   </div>
   <div class="card">
     <div class="card-title"><i class="ti ti-building"></i>Custos fixos mensais (R$)</div>
@@ -190,7 +227,7 @@ footer{text-align:center;font-size:11px;color:var(--t2);margin-top:2rem;padding-
     <div class="tog-row"><span class="tog-row-label">Incluir CAC no cálculo</span><label class="tog"><input type="checkbox" id="tog_cac" checked onchange="calc()"><span class="tsl"></span></label></div>
     <label class="lbl">CAC por novo assinante (R$)</label>
     <input class="inp" type="number" id="cac_val" value="120" min="0" max="2000" step="5" oninput="calc()">
-    <p style="font-size:11px;color:var(--t2);margin-top:10px;line-height:1.5">Aplicado apenas sobre novos assinantes captados em cada onda. Clientes retidos não geram novo CAC.</p>
+    <p style="font-size:11px;color:var(--t2);margin-top:10px;line-height:1.5">Aplicado apenas sobre novos assinantes captados em cada onda.</p>
   </div>
 </div>
 
@@ -198,7 +235,7 @@ footer{text-align:center;font-size:11px;color:var(--t2);margin-top:2rem;padding-
 <div id="sec-planos" class="sec">
   <div class="card">
     <div class="card-title"><i class="ti ti-adjustments-horizontal"></i>Configure os planos</div>
-    <div class="tip"><i class="ti ti-info-circle" style="font-size:16px;flex-shrink:0"></i><span>Digite o <strong>preço mensal</strong> — o kit trimestral é calculado automaticamente (× 3).</span></div>
+    <div class="tip"><i class="ti ti-info-circle" style="font-size:16px;flex-shrink:0"></i><span>Digite o <strong>preço mensal</strong> — kit trimestral calculado automaticamente (× 3).</span></div>
     <div id="planos_inputs"></div>
   </div>
   <div class="stitle">Comparativo de lucratividade</div>
@@ -231,6 +268,23 @@ footer{text-align:center;font-size:11px;color:var(--t2);margin-top:2rem;padding-
 <div id="sec-resultado" class="sec">
   <div class="stitle">Plano para projeção</div>
   <div class="plan-tabs" id="res_plan_tabs"></div>
+
+  <!-- BREAKEVEN -->
+  <div class="card">
+    <div class="card-title"><i class="ti ti-target"></i>Ponto de equilíbrio</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;text-align:center">
+      <div class="be-box">
+        <div class="be-num" id="be_ass">—</div>
+        <div class="be-label">assinantes para cobrir fixos</div>
+      </div>
+      <div class="be-box">
+        <div class="be-num" id="be_ciclo" style="color:var(--green)">—</div>
+        <div class="be-label">ciclo em que vira positivo</div>
+      </div>
+    </div>
+    <canvas id="chartBreakeven" height="160" style="margin-top:1rem"></canvas>
+  </div>
+
   <div class="stitle">Selecione o ciclo</div>
   <div class="ciclo-tabs">
     <div class="ctab on" onclick="setCiclo(0)">1º Ciclo<br><span style="font-size:9px;opacity:.7">Abertura 1</span></div>
@@ -260,6 +314,16 @@ footer{text-align:center;font-size:11px;color:var(--t2);margin-top:2rem;padding-
     <div style="display:flex;justify-content:space-between;margin-top:5px;font-size:10px;color:var(--t2)"><span>0%</span><span id="mbar_lbl" style="color:var(--yellow)">Meta: 30%</span><span>60%</span></div>
     <div id="marg_msg"></div>
   </div>
+
+  <!-- PRECIFICAÇÃO REVERSA -->
+  <div class="card">
+    <div class="card-title"><i class="ti ti-calculator"></i>Precificação reversa</div>
+    <p style="font-size:11px;color:var(--t2);margin-bottom:1rem">Digite a margem que você quer e veja qual preço mínimo o plano precisa ter.</p>
+    <label class="lbl">Margem desejada</label>
+    <div class="sl-row"><input type="range" id="rev_marg" min="5" max="70" value="35" step="1" oninput="document.getElementById('rev_marg_v').textContent=this.value+'%';calcReversa()"><span class="sl-val" id="rev_marg_v">35%</span></div>
+    <div id="rev_resultado" style="margin-top:1rem"></div>
+  </div>
+
   <div class="stitle" style="margin-top:.5rem">Visão anual — 12 meses (4 ciclos)</div>
   <div class="acc-hero">
     <div class="ah-label">Faturamento total em 12 meses</div>
@@ -274,19 +338,61 @@ footer{text-align:center;font-size:11px;color:var(--t2);margin-top:2rem;padding-
   </div>
   <div class="card">
     <div class="card-title"><i class="ti ti-chart-bar"></i>Evolução ciclo a ciclo</div>
-    <div class="inv-row hdr"><span>Ciclo</span><span>Assinantes</span><span style="text-align:right">Faturamento</span><span style="text-align:right">Lucro</span><span style="text-align:right">Margem</span></div>
+    <div class="inv-row hdr" style="grid-template-columns:65px 1fr 1fr 1fr 1fr 1fr"><span>Ciclo</span><span>Assinantes</span><span style="text-align:right">Refeições</span><span style="text-align:right">Faturamento</span><span style="text-align:right">Lucro</span><span style="text-align:right">Margem</span></div>
     <div id="inv_table"></div>
   </div>
 </div>
 
-<footer>Simulador Financeiro Cariani · Anabolic Food × RC · Configurações salvas localmente no navegador</footer>
+<!-- CENÁRIOS -->
+<div id="sec-cenarios" class="sec">
+  <div class="card">
+    <div class="card-title"><i class="ti ti-adjustments"></i>Comparativo de cenários</div>
+    <p style="font-size:11px;color:var(--t2);margin-bottom:1rem;line-height:1.5">Três projeções lado a lado com premissas diferentes de captação e churn. Mostre ao investidor que você pensou no downside.</p>
+    <div class="cen-tabs">
+      <div class="cen-tab pes on" onclick="setCen('pes')">😰 Pessimista</div>
+      <div class="cen-tab rea" onclick="setCen('rea')">📊 Realista</div>
+      <div class="cen-tab oti" onclick="setCen('oti')">🚀 Otimista</div>
+    </div>
+    <div id="cen_detail"></div>
+  </div>
+  <div class="stitle">Todos os cenários — 12 meses</div>
+  <div id="cen_compare"></div>
+  <canvas id="chartCenarios" height="200" style="margin-top:1rem"></canvas>
 </div>
 
+<!-- MODAIS -->
+<div id="modal_parceria" class="modal-overlay" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <h2>Taxa de parceria estratégica</h2>
+      <button class="modal-close" onclick="document.getElementById('modal_parceria').style.display='none'">×</button>
+    </div>
+    <div class="tog-row"><span class="tog-row-label">Incluir no cálculo</span><label class="tog"><input type="checkbox" id="tog_rc" onchange="calc()"><span class="tsl"></span></label></div>
+    <label class="lbl" style="margin-top:1rem">Taxa (% sobre faturamento)</label>
+    <div class="sl-row"><input type="range" id="com_rc" min="0" max="20" value="5" step="0.5" oninput="document.getElementById('com_rc_v').textContent=parseFloat(this.value).toFixed(1)+'%';calc()"><span class="sl-val" id="com_rc_v">5.0%</span></div>
+    <button onclick="document.getElementById('modal_parceria').style.display='none'" style="margin-top:1.25rem;width:100%;background:var(--rc);color:#fff;border:none;border-radius:8px;padding:11px;font-size:13px;font-weight:800;cursor:pointer">Confirmar</button>
+  </div>
+</div>
+
+<div id="modal_pitch" class="modal-overlay" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <h2><i class="ti ti-presentation" style="color:var(--purple)"></i> Resumo Executivo</h2>
+      <button class="modal-close" onclick="document.getElementById('modal_pitch').style.display='none'">×</button>
+    </div>
+    <div id="pitch_content"></div>
+    <button class="btn-copy" onclick="copyPitch()"><i class="ti ti-copy"></i> Copiar texto</button>
+    <button class="btn-full" style="background:var(--blue)" onclick="window.print()"><i class="ti ti-file-type-pdf"></i> Exportar PDF</button>
+  </div>
+</div>
+
+<footer>Simulador Financeiro Cariani · Anabolic Food × RC · v10 PRO</footer>
+</div>
 <div class="toast" id="toast"></div>
 
 <script>
 const MC=3;
-const SK='cariani_sim_final';
+const SK='cariani_sim_v10';
 const DEF={
   custo_m:8.50,custo_emb:12,marg_min:30,
   tog_frete:true,frete:35,tog_taxa:true,taxa_fin:3.5,
@@ -298,17 +404,31 @@ const DEF={
 };
 let PL=DEF.planos.map(p=>({...p}));
 let OD=DEF.ondas.map(o=>({...o}));
-let selRes=1,selCiclo=0,saveTimer=null;
+let selRes=1,selCiclo=0,saveTimer=null,activeCen='pes';
+let chartBE=null,chartCen=null;
+
+// CENARIOS config
+const CENS={
+  pes:{label:'Pessimista',color:'#EF4444',churn:0.10,captMult:0.5,cacMult:1.5},
+  rea:{label:'Realista',color:'#378ADD',churn:0.05,captMult:1.0,cacMult:1.0},
+  oti:{label:'Otimista',color:'#22C55E',churn:0.02,captMult:1.5,cacMult:0.7}
+};
+
+function setCen(id){
+  activeCen=id;
+  document.querySelectorAll('.cen-tab').forEach(t=>t.classList.remove('on'));
+  document.querySelector('.cen-tab.'+id).classList.add('on');
+  renderCenarios();
+}
 
 function setStatus(msg,type){
   const el=document.getElementById('save_status');if(!el)return;
-  const icon=type==='ok'?'ti-cloud-check':type==='saving'?'ti-cloud-upload':type==='err'?'ti-cloud-x':'ti-cloud';
+  const icon=type==='ok'?'ti-cloud-check':type==='saving'?'ti-cloud-upload':'ti-cloud-x';
   el.innerHTML=`<i class="ti ${icon}"></i><span>${msg}</span>`;
   el.className='save-status '+(type||'');
 }
 function triggerAutosave(){
-  clearTimeout(saveTimer);
-  setStatus('Salvando...','saving');
+  clearTimeout(saveTimer);setStatus('Salvando...','saving');
   saveTimer=setTimeout(()=>saveNow(false),1500);
 }
 function saveNow(manual=false){
@@ -317,22 +437,13 @@ function saveNow(manual=false){
     const now=new Date();
     setStatus('Salvo '+now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),'ok');
     if(manual)showToast('Configurações salvas!');
-  }catch(e){
-    setStatus('Erro ao salvar','err');
-    if(manual)showToast('Erro ao salvar','err');
-  }
+  }catch(e){setStatus('Erro ao salvar','err');if(manual)showToast('Erro ao salvar','err');}
 }
 function loadConfig(){
   try{
     const raw=localStorage.getItem(SK);
-    if(raw){
-      const s=JSON.parse(raw);
-      applyState(s);
-      setStatus('Carregado do navegador','ok');
-      showToast('Configurações restauradas!');
-    }else{
-      setStatus('Autosave ativo','ok');
-    }
+    if(raw){applyState(JSON.parse(raw));setStatus('Carregado do navegador','ok');showToast('Configurações restauradas!');}
+    else setStatus('Autosave ativo','ok');
   }catch(e){setStatus('Erro ao carregar','err');}
   calc();
 }
@@ -371,12 +482,14 @@ function goSec(id){
   document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
   document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('on'));
   document.getElementById('sec-'+id).classList.add('on');
-  ['cfg','planos','ondas','resultado'].forEach((s,i)=>{if(s===id)document.querySelectorAll('.ntab')[i].classList.add('on');});
-  calc();
+  ['cfg','planos','ondas','resultado','cenarios'].forEach((s,i)=>{if(s===id)document.querySelectorAll('.ntab')[i].classList.add('on');});
+  if(id==='resultado')setTimeout(renderCharts,50);
+  if(id==='cenarios')setTimeout(renderCenarios,50);
 }
 function setCiclo(i){selCiclo=i;document.querySelectorAll('.ctab').forEach((t,j)=>t.classList.toggle('on',j===i));renderResultado();}
 function fmt(v){return'R$ '+parseFloat(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}
 function fmtK(v){return Math.abs(v)>=1000000?(v<0?'- R$ ':'R$ ')+(Math.abs(v)/1e6).toFixed(2).replace('.',',')+'M':fmt(v)}
+function fmtN(v){return parseFloat(v).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0})}
 function gv(){return{custoM:parseFloat(document.getElementById('custo_m').value)||0,custoEmb:parseFloat(document.getElementById('custo_emb').value)||0,frete:document.getElementById('tog_frete').checked?(parseFloat(document.getElementById('frete').value)||0):0,taxaFin:document.getElementById('tog_taxa').checked?(parseFloat(document.getElementById('taxa_fin').value)||0)/100:0,comRC:document.getElementById('tog_rc').checked?(parseFloat(document.getElementById('com_rc').value)||0)/100:0,fixo:(parseFloat(document.getElementById('fixo_op').value)||0)+(parseFloat(document.getElementById('fixo_mkt').value)||0)+(parseFloat(document.getElementById('fixo_outros').value)||0),cacVal:document.getElementById('tog_cac').checked?(parseFloat(document.getElementById('cac_val').value)||0):0,churnPct:document.getElementById('tog_churn').checked?(parseFloat(document.getElementById('churn_pct').value)||0)/100:0,margMin:parseInt(document.getElementById('marg_min').value)||30};}
 function precoTri(p){return p.preco_mensal*MC;}
 function marmCiclo(p){return p.marmitas*MC;}
@@ -390,7 +503,14 @@ function calcPlan(v,plan,ass,novos){
   const marg=recU>0?((recU-cosU)/recU)*100:0;
   return{fat,prod,frt,tax,rc,cac,fixTri,lucro,recU,cosU,marg,tri,mc};
 }
-function getTri(){const v=gv(),rt=Math.pow(1-v.churnPct,3);let c=0;return OD.map(o=>{const n=Math.round(o.base*o.pct/100),ret=Math.round(c*rt),perd=c-ret;c=ret+n;return{total:c,novos:n,perdidos:perd};});}
+function getTri(vOverride){
+  const v=vOverride||gv(),rt=Math.pow(1-v.churnPct,3);let c=0;
+  return OD.map(o=>{const n=Math.round(o.base*o.pct/100),ret=Math.round(c*rt),perd=c-ret;c=ret+n;return{total:c,novos:n,perdidos:perd};});
+}
+function getTriCen(cfg){
+  const v=gv(),rt=Math.pow(1-cfg.churn,3);let c=0;
+  return OD.map(o=>{const n=Math.round(o.base*(o.pct*cfg.captMult)/100),ret=Math.round(c*rt),perd=c-ret;c=ret+n;return{total:c,novos:n,perdidos:perd};});
+}
 
 function renderPlanosInputs(){
   const el=document.getElementById('planos_inputs');if(!el)return;
@@ -447,7 +567,7 @@ function renderOndas(){
       <label class="lbl">Base de assinantes</label>
       <div class="sl-row"><input type="range" min="100" max="20000" step="50" value="${o.base}" oninput="OD[${i}].base=parseInt(this.value);this.nextElementSibling.textContent=parseInt(this.value).toLocaleString('pt-BR');calc()"><span class="sl-val">${o.base.toLocaleString('pt-BR')}</span></div>
       <label class="lbl">Captação da base</label>
-      <div class="sl-row"><input type="range" min="0.5" max="20" value="${o.pct}" step="0.5" oninput="OD[${i}].pct=parseFloat(this.value);this.nextElementSibling.textContent=parseFloat(this.value).toFixed(1)+'%';calc()"><span class="sl-val">${o.pct.toFixed(1)}%</span></div>
+      <div class="sl-row"><input type="range" min="0.5" max="100" value="${o.pct}" step="0.5" oninput="OD[${i}].pct=parseFloat(this.value);this.nextElementSibling.textContent=parseFloat(this.value).toFixed(1)+'%';calc()"><span class="sl-val">${o.pct.toFixed(1)}%</span></div>
     </div>`).join('');
 }
 function renderChurn(){
@@ -460,19 +580,138 @@ function renderChurn(){
   const cols=['#E8242A','#F5A623','#378ADD','#22C55E'];
   el.innerHTML=tri.map((t,i)=>`<div class="churn-item"><div><div style="font-size:13px;font-weight:800;color:${cols[i]}">${OD[i].label}</div><div style="font-size:11px;color:var(--t2);margin-top:2px">${t.total.toLocaleString('pt-BR')} assinantes</div></div><div class="churn-badges"><span class="cb new">+${t.novos.toLocaleString('pt-BR')}</span>${t.perdidos>0?`<span class="cb lost">-${t.perdidos.toLocaleString('pt-BR')}</span>`:'<span class="cb new">sem churn</span>'}</div></div>`).join('');
 }
+
+function renderCharts(){
+  const v=gv(),tri=getTri(),plan=PL[selRes],mc=marmCiclo(plan);
+  const lucros=tri.map((t,i)=>calcPlan(v,plan,t.total,t.novos).lucro);
+  const fats=tri.map((t,i)=>calcPlan(v,plan,t.total,t.novos).fat);
+  // breakeven chart
+  const ctx=document.getElementById('chartBreakeven');
+  if(!ctx)return;
+  if(chartBE){chartBE.destroy();}
+  chartBE=new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:['Ciclo 1','Ciclo 2','Ciclo 3','Ciclo 4'],
+      datasets:[
+        {label:'Faturamento',data:fats,backgroundColor:'rgba(55,138,221,0.3)',borderColor:'#378ADD',borderWidth:2,borderRadius:6,order:2},
+        {label:'Lucro',data:lucros,backgroundColor:lucros.map(l=>l>=0?'rgba(34,197,94,0.4)':'rgba(232,36,42,0.4)'),borderColor:lucros.map(l=>l>=0?'#22C55E':'#E8242A'),borderWidth:2,borderRadius:6,order:1}
+      ]
+    },
+    options:{responsive:true,plugins:{legend:{labels:{color:'#909090',font:{size:11}}}},scales:{x:{ticks:{color:'#909090'},grid:{color:'rgba(255,255,255,0.05)'}},y:{ticks:{color:'#909090',callback:v=>fmtK(v)},grid:{color:'rgba(255,255,255,0.05)'}}}}
+  });
+}
+
+function calcReversa(){
+  const v=gv();
+  const marg=parseInt(document.getElementById('rev_marg').value)||35;
+  const el=document.getElementById('rev_resultado');if(!el)return;
+  const rows=PL.map(p=>{
+    const mc=marmCiclo(p);
+    const cosU=v.custoM+(v.custoEmb*MC)/mc+(v.frete*MC)/mc;
+    const pNeed=cosU/(1-marg/100-(v.taxaFin)-(v.comRC));
+    const kitNeed=pNeed*mc;
+    const mensalNeed=kitNeed/MC;
+    const atual=precoTri(p)/mc;
+    const ok=atual>=pNeed;
+    return`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bdr);font-size:12px">
+      <div><div style="font-weight:700">${p.nome}</div><div style="font-size:10px;color:var(--t2)">${p.marmitas} marm./mês</div></div>
+      <div style="text-align:right">
+        <div style="font-size:13px;font-weight:800;color:${ok?'var(--green)':'var(--rc)'}">Mín: ${fmt(mensalNeed)}/mês</div>
+        <div style="font-size:10px;color:var(--t2)">${fmt(kitNeed)}/tri · Atual: ${fmt(precoTri(p)/MC)}/mês</div>
+        <div style="font-size:10px;margin-top:2px;color:${ok?'var(--green)':'var(--rc)'}">${ok?'✓ OK':'✗ Abaixo'}</div>
+      </div>
+    </div>`;
+  }).join('');
+  el.innerHTML=rows;
+}
+
+function renderCenarios(){
+  const v=gv(),plan=PL[selRes];
+  const cen=CENS[activeCen];
+  const triCen=getTriCen(cen);
+  let aF=0,aL=0;
+  triCen.forEach(t=>{
+    const vC={...v,churnPct:cen.churn,cacVal:v.cacVal*cen.cacMult};
+    const r=calcPlan(vC,plan,t.total,t.novos);
+    aF+=r.fat;aL+=r.lucro;
+  });
+  const mA=aF>0?(aL/aF*100):0;
+  const detEl=document.getElementById('cen_detail');
+  if(detEl){
+    const rows=triCen.map((t,i)=>{
+      const vC={...v,churnPct:cen.churn,cacVal:v.cacVal*cen.cacMult};
+      const r=calcPlan(vC,plan,t.total,t.novos);
+      const lc=r.lucro>=0?'#22C55E':'#E8242A';
+      return`<div class="cen-row"><span class="lbl2">Ciclo ${i+1} (${t.total} ass.)</span><span style="font-weight:700">${fmtK(r.fat)}</span><span style="color:${lc};font-weight:700">${fmtK(r.lucro)}</span></div>`;
+    }).join('');
+    detEl.innerHTML=`<div class="cen-card">
+      <h4 style="color:${cen.color}">📊 ${cen.label} — premissas: churn ${(cen.churn*100).toFixed(0)}%/mês · captação ${cen.captMult>=1?'+':''}${((cen.captMult-1)*100).toFixed(0)}% · CAC ${cen.cacMult>=1?'+':''}${((cen.cacMult-1)*100).toFixed(0)}%</h4>
+      <div style="display:grid;grid-template-columns:auto 1fr 1fr;gap:6px;font-size:10px;color:var(--t2);font-weight:700;padding-bottom:6px;border-bottom:1px solid var(--bdr)"><span>Ciclo</span><span>Faturamento</span><span>Lucro</span></div>
+      ${rows}
+      <div style="display:flex;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid ${cen.color}40">
+        <span style="font-weight:800;color:${cen.color}">Total 12 meses</span>
+        <span style="font-weight:800">${fmtK(aF)}</span>
+        <span style="font-weight:800;color:${aL>=0?'#22C55E':'#E8242A'}">${fmtK(aL)}</span>
+      </div>
+    </div>`;
+  }
+
+  // comparativo todos
+  const compareEl=document.getElementById('cen_compare');
+  if(compareEl){
+    const rows=Object.entries(CENS).map(([key,cfg])=>{
+      const tC=getTriCen(cfg);let f=0,l=0;
+      tC.forEach(t=>{const vC={...v,churnPct:cfg.churn,cacVal:v.cacVal*cfg.cacMult};const r=calcPlan(vC,plan,t.total,t.novos);f+=r.fat;l+=r.lucro;});
+      const ma=f>0?(l/f*100):0;
+      return`<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:.5rem;padding:10px 0;border-bottom:1px solid var(--bdr);font-size:12px;align-items:center">
+        <span style="font-weight:800;color:${cfg.color}">${cfg.label}</span>
+        <span style="font-weight:700">${fmtK(f)}</span>
+        <span style="font-weight:700;color:${l>=0?'#22C55E':'#E8242A'}">${fmtK(l)}</span>
+        <span style="color:${ma>=0?'#22C55E':'#E8242A'};font-weight:700">${ma.toFixed(1)}%</span>
+      </div>`;
+    }).join('');
+    compareEl.innerHTML=`<div class="card"><div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:.5rem;font-size:10px;color:var(--t2);font-weight:700;padding-bottom:8px;border-bottom:1px solid var(--bdr)"><span>Cenário</span><span>Faturamento</span><span>Lucro</span><span>Margem</span></div>${rows}</div>`;
+  }
+
+  // chart cenarios
+  const ctxC=document.getElementById('chartCenarios');if(!ctxC)return;
+  if(chartCen)chartCen.destroy();
+  const datasets=Object.entries(CENS).map(([key,cfg])=>{
+    const tC=getTriCen(cfg);
+    return{label:cfg.label,data:tC.map((t,i)=>{const vC={...v,churnPct:cfg.churn,cacVal:v.cacVal*cfg.cacMult};return calcPlan(vC,plan,t.total,t.novos).lucro;}),borderColor:cfg.color,backgroundColor:cfg.color+'30',borderWidth:2,fill:true,tension:0.4,pointRadius:5,pointBackgroundColor:cfg.color};
+  });
+  chartCen=new Chart(ctxC,{
+    type:'line',
+    data:{labels:['Ciclo 1','Ciclo 2','Ciclo 3','Ciclo 4'],datasets},
+    options:{responsive:true,plugins:{legend:{labels:{color:'#909090',font:{size:11}}}},scales:{x:{ticks:{color:'#909090'},grid:{color:'rgba(255,255,255,0.05)'}},y:{ticks:{color:'#909090',callback:v=>fmtK(v)},grid:{color:'rgba(255,255,255,0.05)'}}}}
+  });
+}
+
 function renderResultado(){
   const v=gv(),tri=getTri();
   const tE=document.getElementById('res_plan_tabs');
   if(tE)tE.innerHTML=PL.map((p,i)=>`<div class="ptab${i===selRes?' on':''}" onclick="selRes=${i};renderResultado()">${p.nome}<br><span style="font-size:10px;opacity:.8">${fmt(p.preco_mensal)}/mês</span></div>`).join('');
   const plan=PL[selRes],mc=marmCiclo(plan),tc=tri[selCiclo],r=calcPlan(v,plan,tc.total,tc.novos);
   const mL=r.fat>0?(r.lucro/r.fat*100):0,cL=['1º Ciclo','2º Ciclo','3º Ciclo','4º Ciclo'][selCiclo];
+
+  // breakeven
+  const fixTri=v.fixo*MC;
+  const contribuicaoUnit=precoTri(plan)-((v.custoM*mc+v.custoEmb*MC)+(v.frete*MC)+(precoTri(plan)*v.taxaFin)+(precoTri(plan)*v.comRC));
+  const beAss=contribuicaoUnit>0?Math.ceil(fixTri/contribuicaoUnit):null;
+  const beEl=document.getElementById('be_ass'),beCicloEl=document.getElementById('be_ciclo');
+  if(beEl)beEl.textContent=beAss?fmtN(beAss):'—';
+  let beCiclo='—';
+  if(beAss){for(let i=0;i<tri.length;i++){if(tri[i].total>=beAss){beCiclo=(i+1)+'º ciclo';break;}}}
+  if(beCicloEl)beCicloEl.textContent=beCiclo;
+
   const iE=document.getElementById('info_marmitas_txt');
   if(iE)iE.textContent=`${(tc.total*mc).toLocaleString('pt-BR')} marmitas neste ciclo — ${mc}/ass. (${plan.marmitas}/mês × 3) × ${tc.total.toLocaleString('pt-BR')} assinantes`;
   const lcE=document.getElementById('res_ciclo_label');if(lcE)lcE.textContent='Lucro líquido — '+cL;
   const kE=document.getElementById('res_kpis');
   if(kE)kE.innerHTML=`<div class="kpi"><div class="k-lbl">Assinantes</div><div class="k-val gold">${tc.total.toLocaleString('pt-BR')}</div><div class="k-sub">${cL}</div></div><div class="kpi"><div class="k-lbl">Novos</div><div class="k-val g">+${tc.novos.toLocaleString('pt-BR')}</div><div class="k-sub">captados nesse ciclo</div></div><div class="kpi"><div class="k-lbl">Marmitas ciclo</div><div class="k-val bl">${(tc.total*mc).toLocaleString('pt-BR')}</div><div class="k-sub">${mc}/ass. (${plan.marmitas}×3)</div></div><div class="kpi"><div class="k-lbl">Faturamento</div><div class="k-val">${fmtK(r.fat)}</div><div class="k-sub">${tc.total.toLocaleString('pt-BR')} × ${fmt(r.tri)}</div></div>`;
   const dE=document.getElementById('dre_rows');
-  if(dE)dE.innerHTML=`<div class="dre-row"><span>Faturamento bruto <span style="color:var(--t2);font-size:10px">(${tc.total.toLocaleString('pt-BR')} × ${fmt(r.tri)})</span></span><span class="pos">${fmt(r.fat)}</span></div><div class="dre-row"><span style="color:var(--t2);font-size:11px">(-) Custo produtos</span><span class="neg">-${fmt(r.prod)}</span></div><div class="dre-row sub"><span style="padding-left:14px">↳ ${tc.total.toLocaleString('pt-BR')} ass. × (${mc} marm.×${fmt(v.custoM)} + ${MC} emb.×${fmt(v.custoEmb)})</span></div>${v.frete>0?`<div class="dre-row"><span style="color:var(--t2);font-size:11px">(-) Frete (${MC} entregas/ciclo)</span><span class="neg">-${fmt(r.frt)}</span></div>`:''}${v.taxaFin>0?`<div class="dre-row"><span style="color:var(--t2);font-size:11px">(-) Taxa financeira</span><span class="neg">-${fmt(r.tax)}</span></div>`:''}${v.comRC>0?`<div class="dre-row"><span style="color:var(--t2);font-size:11px">(-) Comissão RC</span><span class="neg">-${fmt(r.rc)}</span></div>`:''}${v.cacVal>0?`<div class="dre-row"><span style="color:var(--t2);font-size:11px">(-) CAC (${tc.novos.toLocaleString('pt-BR')} novos)</span><span class="neg">-${fmt(r.cac)}</span></div>`:''}<div class="dre-row"><span style="color:var(--t2);font-size:11px">(-) Custos fixos (${MC} meses)</span><span class="neg">-${fmt(r.fixTri)}</span></div><div class="dre-row tot"><span>Lucro líquido</span><span class="${r.lucro>=0?'pos':'neg'}">${fmt(r.lucro)}</span></div>`;
+  if(dE)dE.innerHTML=`<div class="dre-row"><span>Faturamento bruto <span style="color:var(--t2);font-size:10px">(${tc.total.toLocaleString('pt-BR')} × ${fmt(r.tri)})</span></span><span class="pos">${fmt(r.fat)}</span></div><div class="dre-row"><span style="color:var(--t2);font-size:11px">(-) Custo produtos</span><span class="neg">-${fmt(r.prod)}</span></div><div class="dre-row sub"><span style="padding-left:14px">↳ ${tc.total.toLocaleString('pt-BR')} ass. × (${mc} marm.×${fmt(v.custoM)} + ${MC} emb.×${fmt(v.custoEmb)})</span></div>${v.frete>0?`<div class="dre-row"><span style="color:var(--t2);font-size:11px">(-) Frete (${MC} entregas/ciclo)</span><span class="neg">-${fmt(r.frt)}</span></div>`:''}${v.taxaFin>0?`<div class="dre-row"><span style="color:var(--t2);font-size:11px">(-) Taxa financeira</span><span class="neg">-${fmt(r.tax)}</span></div>`:''}${v.comRC>0?`<div class="dre-row"><span style="color:var(--t2);font-size:11px">(-) Parceria estratégica</span><span class="neg">-${fmt(r.rc)}</span></div>`:''}${v.cacVal>0?`<div class="dre-row"><span style="color:var(--t2);font-size:11px">(-) CAC (${tc.novos.toLocaleString('pt-BR')} novos)</span><span class="neg">-${fmt(r.cac)}</span></div>`:''}<div class="dre-row"><span style="color:var(--t2);font-size:11px">(-) Custos fixos (${MC} meses)</span><span class="neg">-${fmt(r.fixTri)}</span></div><div class="dre-row tot"><span>Lucro líquido</span><span class="${r.lucro>=0?'pos':'neg'}">${fmt(r.lucro)}</span></div>`;
   const lEl=document.getElementById('res_lucro');if(lEl){lEl.textContent=fmt(r.lucro);lEl.className='rv '+(r.lucro>=0?'g':'r');}
   const sEl=document.getElementById('res_lucro_sub');if(sEl)sEl.textContent=plan.nome+' · '+fmt(plan.preco_mensal)+'/mês · kit '+fmt(r.tri)+'/tri · '+mc+' marm./ciclo';
   document.getElementById('r_rec').textContent=fmt(r.recU);
@@ -484,12 +723,36 @@ function renderResultado(){
   if(mf){mf.style.width=pct+'%';mf.style.background=r.marg>=v.margMin?'#22C55E':'#E8242A';mf.textContent=r.marg.toFixed(1)+'%';}
   if(mt)mt.style.left=tgt+'%';if(ml)ml.textContent='Meta: '+v.margMin+'%';
   const msgEl=document.getElementById('marg_msg');
-  if(msgEl){if(r.marg<v.margMin){const pN=r.cosU/(1-v.margMin/100);msgEl.innerHTML=`<div class="warn"><i class="ti ti-alert-triangle"></i>Abaixo da meta. Preço mínimo: <strong>${fmt(pN*mc/MC)}/mês</strong> (${fmt(pN*mc)}/tri)</div>`;}else msgEl.innerHTML=`<div class="succ"><i class="ti ti-check"></i>Meta atingida! Contribuição: <strong>${fmt((r.recU-r.cosU)*mc)}</strong>/ciclo por assinante</div>`;}
-  let aF=0,aL=0,aM=0;
+  if(msgEl){if(r.marg<v.margMin){const pN=r.cosU/(1-v.margMin/100);msgEl.innerHTML=`<div class="warn"><i class="ti ti-alert-triangle"></i>Abaixo da meta. Preço mín.: <strong>${fmt(pN*mc/MC)}/mês</strong> (${fmt(pN*mc)}/tri)</div>`;}else msgEl.innerHTML=`<div class="succ"><i class="ti ti-check"></i>Meta atingida! Contribuição: <strong>${fmt((r.recU-r.cosU)*mc)}</strong>/ciclo por assinante</div>`;}
+
+  calcReversa();
+
+  let aF=0,aL=0,aM=0,aRef=0;
   const maxF=Math.max(...tri.map(t=>calcPlan(v,plan,t.total,t.novos).fat));
-  const rows=tri.map((t,i)=>{const ra=calcPlan(v,plan,t.total,t.novos);aF+=ra.fat;aL+=ra.lucro;aM+=t.total*mc;const bp=maxF>0?Math.round(ra.fat/maxF*100):0,lc=ra.lucro>=0?'#22C55E':'#E8242A',ml2=ra.fat>0?(ra.lucro/ra.fat*100):0,iS=i===selCiclo;return`<div class="inv-row" style="${iS?'background:rgba(232,36,42,.07);border-radius:6px;padding-left:6px;padding-right:6px;':''}"><span style="font-weight:800;color:${iS?'var(--rc)':'var(--t1)'}">Ciclo ${i+1}</span><div><div class="inv-bar-bg"><div class="inv-bar-f" style="width:${bp}%;background:${lc}"></div></div><div style="font-size:10px;color:var(--t2);margin-top:2px">${t.total.toLocaleString('pt-BR')} ass. · ${(t.total*mc).toLocaleString('pt-BR')} marm.</div></div><span style="text-align:right;font-size:11px">${fmtK(ra.fat)}</span><span style="text-align:right;font-size:11px;color:${lc};font-weight:700">${fmtK(ra.lucro)}</span><span style="text-align:right;font-size:11px;color:${ml2>=0?'var(--green)':'var(--rc)'}">${ml2.toFixed(1)}%</span></div>`;}).join('');
-  const tbl=document.getElementById('inv_table');if(tbl)tbl.innerHTML=rows;
+  const rows=tri.map((t,i)=>{
+    const ra=calcPlan(v,plan,t.total,t.novos);
+    aF+=ra.fat;aL+=ra.lucro;aM+=t.total*mc;
+    const ref=t.total*mc;aRef+=ref;
+    const bp=maxF>0?Math.round(ra.fat/maxF*100):0,lc=ra.lucro>=0?'#22C55E':'#E8242A',ml2=ra.fat>0?(ra.lucro/ra.fat*100):0,iS=i===selCiclo;
+    return`<div class="inv-row" style="grid-template-columns:65px 1fr 1fr 1fr 1fr 1fr;${iS?'background:rgba(232,36,42,.07);border-radius:6px;padding-left:6px;padding-right:6px;':''}">
+      <span style="font-weight:800;color:${iS?'var(--rc)':'var(--t1)'}">Ciclo ${i+1}</span>
+      <div><div class="inv-bar-bg"><div class="inv-bar-f" style="width:${bp}%;background:${lc}"></div></div><div style="font-size:10px;color:var(--t2);margin-top:2px">${t.total.toLocaleString('pt-BR')} ass.</div></div>
+      <span style="text-align:right;font-size:11px;color:var(--blue);font-weight:700">${ref.toLocaleString('pt-BR')}</span>
+      <span style="text-align:right;font-size:11px">${fmtK(ra.fat)}</span>
+      <span style="text-align:right;font-size:11px;color:${lc};font-weight:700">${fmtK(ra.lucro)}</span>
+      <span style="text-align:right;font-size:11px;color:${ml2>=0?'var(--green)':'var(--rc)'}">${ml2.toFixed(1)}%</span>
+    </div>`;
+  }).join('');
   const mA=aF>0?(aL/aF*100):0;
+  const totalRow=`<div style="grid-template-columns:65px 1fr 1fr 1fr 1fr 1fr;display:grid;gap:6px;align-items:center;padding:10px 6px;margin-top:4px;background:rgba(245,166,35,.07);border-radius:8px;border:1px solid rgba(245,166,35,.2)">
+    <span style="font-size:10px;font-weight:800;color:var(--gold)">TOTAL</span>
+    <span style="font-size:10px;color:var(--t2)">4 ciclos</span>
+    <span style="text-align:right;font-size:12px;font-weight:800;color:var(--blue)">${aRef.toLocaleString('pt-BR')}</span>
+    <span style="text-align:right;font-size:12px;font-weight:800;color:var(--gold)">${fmtK(aF)}</span>
+    <span style="text-align:right;font-size:12px;font-weight:800;color:${aL>=0?'var(--green)':'var(--rc)'}">${fmtK(aL)}</span>
+    <span style="text-align:right;font-size:12px;font-weight:800;color:${mA>=0?'var(--green)':'var(--rc)'}">${mA.toFixed(1)}%</span>
+  </div>`;
+  const tbl=document.getElementById('inv_table');if(tbl)tbl.innerHTML=rows+totalRow;
   const fE=document.getElementById('inv_fat_total'),lE2=document.getElementById('inv_lucro'),mE=document.getElementById('inv_marg'),mmE=document.getElementById('inv_marm'),mmS=document.getElementById('inv_marm_sub'),aE=document.getElementById('inv_ass'),s2=document.getElementById('inv_fat_sub');
   if(fE)fE.textContent=fmtK(aF);
   if(s2)s2.textContent='4 ciclos · '+plan.nome+' · '+fmt(plan.preco_mensal)+'/mês · kit '+fmt(precoTri(plan))+'/tri';
@@ -498,7 +761,63 @@ function renderResultado(){
   if(mmE)mmE.textContent=aM.toLocaleString('pt-BR');
   if(mmS)mmS.textContent=mc+' marm./ass./ciclo × 4 ciclos';
   if(aE)aE.textContent=tri[3].total.toLocaleString('pt-BR');
+  renderCharts();
 }
+
+function openPitch(){
+  const v=gv(),tri=getTri(),plan=PL[selRes],mc=marmCiclo(plan);
+  let aF=0,aL=0,aRef=0;
+  tri.forEach(t=>{const r=calcPlan(v,plan,t.total,t.novos);aF+=r.fat;aL+=r.lucro;aRef+=t.total*mc;});
+  const mA=aF>0?(aL/aF*100):0;
+  const fixTri=v.fixo*MC;
+  const contUnit=precoTri(plan)-((v.custoM*mc+v.custoEmb*MC)+(v.frete*MC)+(precoTri(plan)*v.taxaFin)+(precoTri(plan)*v.comRC));
+  const beAss=contUnit>0?Math.ceil(fixTri/contUnit):null;
+  const r1=calcPlan(v,plan,tri[0].total,tri[0].novos);
+  const r4=calcPlan(v,plan,tri[3].total,tri[3].novos);
+
+  const content=`
+    <div class="pitch-section">
+      <h3>🎯 O Negócio</h3>
+      <p>Clube de assinatura trimestral de marmitas saudáveis ultracongeladas da <strong>Linha ${plan.nome} Renato Cariani × Anabolic Food</strong>. Produto premium com curadoria de influenciador fitness com 7,9M de seguidores. Modelo de receita recorrente com carrinho aberto a cada 3 meses.</p>
+    </div>
+    <div class="pitch-section">
+      <h3>📊 Projeção 12 meses — Plano ${plan.nome}</h3>
+      <div class="pitch-kpi-grid">
+        <div class="pitch-kpi"><div class="pk-v">${fmtK(aF)}</div><div class="pk-l">Faturamento total</div></div>
+        <div class="pitch-kpi"><div class="pk-v" style="color:${aL>=0?'var(--green)':'var(--rc)'}">${fmtK(aL)}</div><div class="pk-l">Lucro acumulado</div></div>
+        <div class="pitch-kpi"><div class="pk-v">${mA.toFixed(1)}%</div><div class="pk-l">Margem líquida anual</div></div>
+        <div class="pitch-kpi"><div class="pk-v">${aRef.toLocaleString('pt-BR')}</div><div class="pk-l">Refeições entregues</div></div>
+        <div class="pitch-kpi"><div class="pk-v">${tri[3].total.toLocaleString('pt-BR')}</div><div class="pk-l">Assinantes no 4º ciclo</div></div>
+        <div class="pitch-kpi"><div class="pk-v">${fmt(plan.preco_mensal)}/mês</div><div class="pk-l">Ticket por assinante</div></div>
+        <div class="pitch-kpi"><div class="pk-v">${beAss?fmtN(beAss)+'ass.':'—'}</div><div class="pk-l">Break-even</div></div>
+        <div class="pitch-kpi"><div class="pk-v">${fmt(r1.recU)}</div><div class="pk-l">Receita/refeição</div></div>
+      </div>
+    </div>
+    <div class="pitch-section">
+      <h3>💡 Diferenciais competitivos</h3>
+      <ul>
+        <li>Curadoria e autoridade do maior influenciador fitness do Brasil</li>
+        <li>Modelo de escassez — carrinho aberto apenas 4× ao ano</li>
+        <li>Receita recorrente previsível com renovação automática</li>
+        <li>Embalagens biodegradáveis e cardápio exclusivo por edição</li>
+        <li>Logística nacional com entrega em até 5 dias úteis</li>
+      </ul>
+    </div>
+    <div class="pitch-section">
+      <h3>📈 Evolução ciclo a ciclo</h3>
+      ${tri.map((t,i)=>{const r=calcPlan(v,plan,t.total,t.novos);const lc=r.lucro>=0?'var(--green)':'var(--rc)';return`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bdr);font-size:12px"><span style="color:var(--t2)">Ciclo ${i+1} — ${t.total} assinantes</span><span style="font-weight:700">${fmtK(r.fat)}</span><span style="font-weight:700;color:${lc}">${fmtK(r.lucro)}</span></div>`;}).join('')}
+    </div>
+  `;
+  document.getElementById('pitch_content').innerHTML=content;
+  document.getElementById('modal_pitch').style.display='flex';
+}
+
+function copyPitch(){
+  const el=document.getElementById('pitch_content');
+  const text=el.innerText;
+  navigator.clipboard.writeText(text).then(()=>showToast('Texto copiado!')).catch(()=>showToast('Erro ao copiar','err'));
+}
+
 function calc(){
   renderPlanosInputs();renderPlanosCards();renderOndas();renderChurn();renderResultado();
   triggerAutosave();
