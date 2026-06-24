@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador Financeiro Cariani — Anabolic Food</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.5.0/dist/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --rc:#E8242A;--gold:#F5A623;--green:#22C55E;--yellow:#EAB308;--blue:#378ADD;
+  --s0:#141414;--s1:#1C1C1C;--s2:#252525;--s3:#2F2F2F;--s4:#3A3A3A;
+  --t1:#F2F2F2;--t2:#909090;
+  --bdr:rgba(255,255,255,0.09);--rad:12px;--rad-sm:8px;
+}
+body{background:var(--s0);min-height:100vh;font-family:system-ui,-apple-system,sans-serif;color:var(--t1);padding:1rem}
+.app{max-width:720px;margin:0 auto;padding-bottom:3rem}
+.hdr{background:var(--s1);border:1px solid var(--bdr);border-radius:var(--rad);padding:1rem 1.5rem;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.hdr-txt h1{font-size:20px;font-weight:800;letter-spacing:-0.5px}
+.hdr-txt h1 span{color:var(--rc)}
+.hdr-txt p{font-size:12px;color:var(--t2);margin-top:3px}
+.hdr-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.badge{background:var(--rc);color:#fff;font-size:9px;font-weight:800;padding:4px 10px;border-radius:20px;letter-spacing:1px;white-space:nowrap}
+.save-bar{display:flex;gap:6px;align-items:center}
+.btn-save{background:var(--green);color:#fff;font-size:11px;font-weight:800;padding:8px 16px;border-radius:var(--rad-sm);cursor:pointer;border:none;display:flex;align-items:center;gap:5px;white-space:nowrap;transition:opacity .15s}
+.btn-save:active{opacity:.75}
+.btn-reset{background:transparent;color:var(--t2);font-size:11px;font-weight:700;padding:8px 12px;border-radius:var(--rad-sm);cursor:pointer;border:1px solid var(--bdr);display:flex;align-items:center;gap:4px;transition:all .15s}
+.btn-reset:hover{border-color:var(--rc);color:var(--rc)}
+.save-status{font-size:10px;height:20px;display:flex;align-items:center;gap:5px}
+.save-status.ok{color:var(--green)}.save-status.saving{color:var(--gold)}.save-status.err{color:var(--rc)}
+.nav{display:flex;gap:0;margin-bottom:1rem;background:var(--s1);border:1px solid var(--bdr);border-radius:var(--rad);padding:4px;overflow-x:auto}
+.nav::-webkit-scrollbar{display:none}
+.ntab{flex:1;min-width:0;background:transparent;border:none;color:var(--t2);font-size:11px;font-weight:700;padding:9px 6px;border-radius:var(--rad-sm);cursor:pointer;transition:all .15s;white-space:nowrap;text-align:center;display:flex;flex-direction:column;align-items:center;gap:3px}
+.ntab i{font-size:18px}
+.ntab.on{background:var(--rc);color:#fff}
+.sec{display:none}.sec.on{display:block}
+.card{background:var(--s1);border:1px solid var(--bdr);border-radius:var(--rad);padding:1.25rem 1.5rem;margin-bottom:.85rem}
+.card-title{font-size:10px;font-weight:800;color:var(--t2);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:1rem;display:flex;align-items:center;gap:6px}
+.card-title i{color:var(--rc);font-size:15px}
+label.lbl{font-size:11px;color:var(--t2);display:block;margin-bottom:5px;margin-top:14px}
+label.lbl:first-of-type{margin-top:0}
+.inp{width:100%;background:var(--s3);border:1px solid var(--bdr);border-radius:var(--rad-sm);color:var(--t1);font-size:15px;padding:10px 12px;outline:none;-webkit-appearance:none;transition:border-color .15s}
+.inp:focus{border-color:var(--rc)}
+.sl-row{display:flex;align-items:center;gap:12px;margin-top:6px}
+.sl-row input[type=range]{flex:1;accent-color:var(--rc);height:4px;cursor:pointer}
+.sl-val{font-size:14px;font-weight:800;min-width:60px;text-align:right;color:var(--t1)}
+.sl-val.gold{color:var(--gold)}
+.tog-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bdr)}
+.tog-row:last-child{border-bottom:none}
+.tog-row-label{font-size:13px;color:var(--t1)}
+.tog{position:relative;width:42px;height:24px;flex-shrink:0}
+.tog input{opacity:0;width:0;height:0}
+.tsl{position:absolute;cursor:pointer;inset:0;background:var(--s4);border-radius:24px;transition:.25s}
+.tsl:before{content:'';position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:white;border-radius:50%;transition:.25s}
+input:checked+.tsl{background:var(--rc)}
+input:checked+.tsl:before{transform:translateX(18px)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.kpi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem;margin-bottom:.85rem}
+@media(min-width:500px){.kpi-grid{grid-template-columns:repeat(4,1fr)}.acc-grid{grid-template-columns:repeat(4,1fr)!important}}
+.kpi{background:var(--s2);border-radius:var(--rad-sm);padding:.9rem 1rem}
+.kpi .k-lbl{font-size:10px;color:var(--t2);font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:5px}
+.kpi .k-val{font-size:20px;font-weight:900;line-height:1}
+.kpi .k-sub{font-size:10px;color:var(--t2);margin-top:3px}
+.k-val.g{color:var(--green)}.k-val.r{color:var(--rc)}.k-val.gold{color:var(--gold)}.k-val.bl{color:var(--blue)}
+.res-box{background:var(--s2);border:1.5px solid var(--rc);border-radius:var(--rad);padding:1.5rem;text-align:center;margin-bottom:.85rem}
+.res-box .rt{font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--t2);margin-bottom:8px}
+.res-box .rv{font-size:38px;font-weight:900;letter-spacing:-1px}
+.rv.g{color:var(--green)}.rv.r{color:var(--rc)}
+.res-box .rs{font-size:12px;color:var(--t2);margin-top:6px}
+.dre-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bdr);font-size:12px}
+.dre-row:last-child{border-bottom:none}
+.dre-row.tot{font-weight:800;font-size:15px;padding-top:12px;border-top:1px solid var(--rc);border-bottom:none;margin-top:2px}
+.dre-row.sub{padding:3px 0;font-size:10px;color:var(--t2)}
+.neg{color:var(--rc)}.pos{color:var(--green)}
+.mbar{background:var(--s3);border-radius:5px;height:20px;overflow:hidden;position:relative;margin-top:10px}
+.mfill{height:100%;border-radius:5px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-size:10px;font-weight:800;color:#fff;transition:width .35s,background .35s;min-width:4px}
+.mtgt{position:absolute;top:0;bottom:0;border-left:2px dashed var(--yellow)}
+.warn{background:rgba(234,179,8,.1);border:1px solid rgba(234,179,8,.3);border-radius:8px;padding:10px 12px;font-size:11px;color:var(--yellow);margin-top:10px;display:flex;gap:8px;align-items:flex-start;line-height:1.5}
+.succ{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);border-radius:8px;padding:10px 12px;font-size:11px;color:var(--green);margin-top:10px;display:flex;gap:8px;align-items:flex-start;line-height:1.5}
+.stitle{font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--t2);margin-bottom:.85rem;display:flex;align-items:center;gap:8px}
+.stitle::after{content:'';flex:1;height:1px;background:var(--bdr)}
+.plan-tabs{display:flex;gap:6px;margin-bottom:.85rem;flex-wrap:wrap}
+.ptab{background:var(--s3);border:1px solid var(--bdr);color:var(--t2);font-size:11px;font-weight:700;padding:9px 12px;border-radius:var(--rad-sm);cursor:pointer;flex:1;text-align:center;min-width:80px;transition:all .15s}
+.ptab.on{background:var(--rc);border-color:var(--rc);color:#fff}
+.plan-card{background:var(--s2);border:1px solid var(--bdr);border-radius:var(--rad);padding:1.25rem;margin-bottom:.75rem}
+.plan-card.best{border:2px solid var(--green)}
+.plan-ph{display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem}
+.plan-name{font-size:15px;font-weight:800}
+.plan-badge{font-size:9px;font-weight:800;padding:3px 10px;border-radius:20px}
+.plan-badge.rec{background:rgba(34,197,94,.15);color:var(--green)}
+.plan-badge.pop{background:rgba(245,166,35,.15);color:var(--gold)}
+.plan-sep{height:1px;background:var(--bdr);margin:.75rem 0}
+.plan-row{display:flex;justify-content:space-between;font-size:12px;padding:4px 0;color:var(--t2)}
+.plan-row span:last-child{font-weight:700;color:var(--t1)}
+.plan-row.hl span:last-child{font-weight:900}
+.marmita-pill{display:inline-flex;align-items:center;gap:5px;background:rgba(55,138,221,.12);border:1px solid rgba(55,138,221,.25);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;color:var(--blue);margin-top:8px}
+.wave-item{background:var(--s2);border-radius:var(--rad-sm);padding:1rem;margin-bottom:.75rem}
+.wave-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem}
+.wave-lbl{font-size:11px;font-weight:800;color:var(--rc);letter-spacing:.5px}
+.wave-count{font-size:18px;font-weight:900;color:var(--gold)}
+.churn-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bdr);font-size:12px}
+.churn-item:last-child{border-bottom:none}
+.churn-badges{display:flex;gap:6px}
+.cb{font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px}
+.cb.new{background:rgba(34,197,94,.15);color:var(--green)}
+.cb.lost{background:rgba(232,36,42,.15);color:var(--rc)}
+.ciclo-tabs{display:flex;gap:6px;margin-bottom:.85rem;flex-wrap:wrap}
+.ctab{background:var(--s3);border:1px solid var(--bdr);color:var(--t2);font-size:11px;font-weight:700;padding:8px 10px;border-radius:var(--rad-sm);cursor:pointer;flex:1;text-align:center;min-width:70px;transition:all .15s}
+.ctab.on{background:var(--rc);border-color:var(--rc);color:#fff}
+.inv-row{display:grid;grid-template-columns:65px 1fr 1fr 1fr 1fr;gap:6px;align-items:center;padding:9px 0;border-bottom:1px solid var(--bdr);font-size:11px}
+.inv-row:last-child{border-bottom:none}
+.inv-row.hdr{color:var(--t2);font-weight:700;font-size:10px;padding-bottom:6px}
+.inv-bar-bg{background:var(--s3);border-radius:3px;height:7px;overflow:hidden}
+.inv-bar-f{height:100%;border-radius:3px;transition:width .3s}
+.acc-hero{background:var(--s2);border:1.5px solid var(--gold);border-radius:var(--rad);padding:1.5rem;margin-bottom:.85rem}
+.acc-hero .ah-label{font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+.acc-hero .ah-val{font-size:36px;font-weight:900;letter-spacing:-1px;color:var(--gold)}
+.acc-hero .ah-sub{font-size:12px;color:var(--t2);margin-top:6px}
+.acc-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.info-strip{background:rgba(55,138,221,.08);border:1px solid rgba(55,138,221,.2);border-radius:var(--rad-sm);padding:11px 14px;font-size:11px;color:var(--blue);margin-bottom:.85rem;display:flex;align-items:center;gap:8px;font-weight:600;line-height:1.4}
+.tip{display:flex;align-items:center;gap:8px;background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.2);border-radius:var(--rad-sm);padding:10px 14px;font-size:11px;color:var(--gold);margin-bottom:1rem;line-height:1.4}
+.plano-blk{background:var(--s2);border-radius:var(--rad-sm);padding:1rem;margin-bottom:.75rem}
+.plano-blk-title{font-size:10px;font-weight:800;color:var(--rc);margin-bottom:.85rem;letter-spacing:.5px}
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--s1);border:1px solid var(--bdr);border-radius:var(--rad);padding:12px 20px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;transition:transform .3s;z-index:9999;white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,.5)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.ok{color:var(--green);border-color:rgba(34,197,94,.3)}
+.toast.err{color:var(--rc);border-color:rgba(232,36,42,.3)}
+footer{text-align:center;font-size:11px;color:var(--t2);margin-top:2rem;padding-top:1rem;border-top:1px solid var(--bdr)}
+</style>
+</head>
+<body>
+<div class="app">
+
+<div class="hdr">
+  <div class="hdr-txt">
+    <h1>Simulador <span>Cariani</span></h1>
+    <p>Anabolic Food × RC — War Room Financeira</p>
+  </div>
+  <div class="hdr-right">
+    <span class="badge">v9 · FINAL</span>
+    <div class="save-bar">
+      <button class="btn-reset" onclick="resetConfig()"><i class="ti ti-refresh"></i> Reset</button>
+      <button class="btn-save" onclick="saveNow(true)"><i class="ti ti-device-floppy"></i> Salvar</button>
+    </div>
+    <div class="save-status ok" id="save_status"><i class="ti ti-cloud-check"></i><span>Pronto</span></div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="ntab on" onclick="goSec('cfg')"><i class="ti ti-settings"></i>Config</button>
+  <button class="ntab" onclick="goSec('planos')"><i class="ti ti-layout-columns"></i>Planos</button>
+  <button class="ntab" onclick="goSec('ondas')"><i class="ti ti-wave-sine"></i>Ondas</button>
+  <button class="ntab" onclick="goSec('resultado')"><i class="ti ti-chart-line"></i>Resultado</button>
+</div>
+
+<!-- CONFIG -->
+<div id="sec-cfg" class="sec on">
+  <div class="card">
+    <div class="card-title"><i class="ti ti-currency-dollar"></i>Precificação</div>
+    <label class="lbl">Custo unitário da marmita (R$ — inclui embalagem individual)</label>
+    <input class="inp" type="number" id="custo_m" value="8.50" min="1" max="50" step="0.10" oninput="calc()">
+    <label class="lbl">Embalagem de envio do kit (R$ — 1 por entrega, 3 entregas/ciclo)</label>
+    <input class="inp" type="number" id="custo_emb" value="12" min="0" max="100" step="0.50" oninput="calc()">
+    <label class="lbl">Margem mínima desejada por refeição</label>
+    <div class="sl-row"><input type="range" id="marg_min" min="10" max="60" value="30" step="1" oninput="document.getElementById('marg_min_v').textContent=this.value+'%';calc()"><span class="sl-val" id="marg_min_v">30%</span></div>
+  </div>
+  <div class="card">
+    <div class="card-title"><i class="ti ti-receipt"></i>Custos variáveis</div>
+    <div class="tog-row"><span class="tog-row-label">Frete por entrega</span><label class="tog"><input type="checkbox" id="tog_frete" checked onchange="calc()"><span class="tsl"></span></label></div>
+    <label class="lbl">Valor do frete por entrega (R$) — 3 fretes por ciclo</label>
+    <input class="inp" type="number" id="frete" value="35" min="0" max="300" step="1" oninput="calc()">
+    <div class="tog-row" style="margin-top:10px"><span class="tog-row-label">Taxa financeira / antecipação</span><label class="tog"><input type="checkbox" id="tog_taxa" checked onchange="calc()"><span class="tsl"></span></label></div>
+    <label class="lbl">Taxa financeira (% sobre faturamento)</label>
+    <div class="sl-row"><input type="range" id="taxa_fin" min="0" max="8" value="3.5" step="0.5" oninput="document.getElementById('taxa_v').textContent=parseFloat(this.value).toFixed(1)+'%';calc()"><span class="sl-val" id="taxa_v">3.5%</span></div>
+    <div class="tog-row" style="margin-top:10px"><span class="tog-row-label">Comissão Renato Cariani</span><label class="tog"><input type="checkbox" id="tog_rc" onchange="calc()"><span class="tsl"></span></label></div>
+    <label class="lbl">Comissão RC (% sobre faturamento)</label>
+    <div class="sl-row"><input type="range" id="com_rc" min="0" max="20" value="5" step="0.5" oninput="document.getElementById('com_rc_v').textContent=parseFloat(this.value).toFixed(1)+'%';calc()"><span class="sl-val" id="com_rc_v">5.0%</span></div>
+  </div>
+  <div class="card">
+    <div class="card-title"><i class="ti ti-building"></i>Custos fixos mensais (R$)</div>
+    <label class="lbl">Operação / equipe</label>
+    <input class="inp" type="number" id="fixo_op" value="25000" min="0" step="500" oninput="calc()">
+    <label class="lbl">Marketing / mídia paga</label>
+    <input class="inp" type="number" id="fixo_mkt" value="15000" min="0" step="500" oninput="calc()">
+    <label class="lbl">Outros fixos</label>
+    <input class="inp" type="number" id="fixo_outros" value="8000" min="0" step="500" oninput="calc()">
+  </div>
+  <div class="card">
+    <div class="card-title"><i class="ti ti-users"></i>CAC — custo de aquisição</div>
+    <div class="tog-row"><span class="tog-row-label">Incluir CAC no cálculo</span><label class="tog"><input type="checkbox" id="tog_cac" checked onchange="calc()"><span class="tsl"></span></label></div>
+    <label class="lbl">CAC por novo assinante (R$)</label>
+    <input class="inp" type="number" id="cac_val" value="120" min="0" max="2000" step="5" oninput="calc()">
+    <p style="font-size:11px;color:var(--t2);margin-top:10px;line-height:1.5">Aplicado apenas sobre novos assinantes captados em cada onda. Clientes retidos não geram novo CAC.</p>
+  </div>
+</div>
+
+<!-- PLANOS -->
+<div id="sec-planos" class="sec">
+  <div class="card">
+    <div class="card-title"><i class="ti ti-adjustments-horizontal"></i>Configure os planos</div>
+    <div class="tip"><i class="ti ti-info-circle" style="font-size:16px;flex-shrink:0"></i><span>Digite o <strong>preço mensal</strong> — o kit trimestral é calculado automaticamente (× 3).</span></div>
+    <div id="planos_inputs"></div>
+  </div>
+  <div class="stitle">Comparativo de lucratividade</div>
+  <div id="planos_cards"></div>
+</div>
+
+<!-- ONDAS -->
+<div id="sec-ondas" class="sec">
+  <div class="card">
+    <div class="card-title"><i class="ti ti-wave-sine"></i>Ondas de captação</div>
+    <div id="ondas_inputs"></div>
+  </div>
+  <div class="card">
+    <div class="card-title"><i class="ti ti-trending-down"></i>Churn mensal</div>
+    <div class="tog-row"><span class="tog-row-label">Aplicar churn na projeção</span><label class="tog"><input type="checkbox" id="tog_churn" checked onchange="calc()"><span class="tsl"></span></label></div>
+    <label class="lbl">Churn mensal médio</label>
+    <div class="sl-row"><input type="range" id="churn_pct" min="0" max="15" value="5" step="0.5" oninput="document.getElementById('churn_v').textContent=parseFloat(this.value).toFixed(1)+'%';calc()"><span class="sl-val" id="churn_v">5.0%</span></div>
+    <label class="lbl">Retenção esperada após 3 meses</label>
+    <div class="sl-row"><input type="range" id="ret_pct" min="50" max="100" value="80" step="1" oninput="document.getElementById('ret_v').textContent=this.value+'%';calc()"><span class="sl-val" id="ret_v">80%</span></div>
+    <div class="kpi-grid" style="margin-top:1.25rem">
+      <div class="kpi"><div class="k-lbl">LTV estimado</div><div class="k-val gold" id="ltv_val">R$0</div><div class="k-sub" id="ltv_sub">3 ciclos</div></div>
+      <div class="kpi"><div class="k-lbl">LTV / CAC ratio</div><div class="k-val" id="ltv_ratio">—</div><div class="k-sub">meta: acima de 3x</div></div>
+    </div>
+  </div>
+  <div class="stitle">Evolução com churn</div>
+  <div class="card"><div id="churn_table"></div></div>
+</div>
+
+<!-- RESULTADO -->
+<div id="sec-resultado" class="sec">
+  <div class="stitle">Plano para projeção</div>
+  <div class="plan-tabs" id="res_plan_tabs"></div>
+  <div class="stitle">Selecione o ciclo</div>
+  <div class="ciclo-tabs">
+    <div class="ctab on" onclick="setCiclo(0)">1º Ciclo<br><span style="font-size:9px;opacity:.7">Abertura 1</span></div>
+    <div class="ctab" onclick="setCiclo(1)">2º Ciclo<br><span style="font-size:9px;opacity:.7">Abertura 2</span></div>
+    <div class="ctab" onclick="setCiclo(2)">3º Ciclo<br><span style="font-size:9px;opacity:.7">Abertura 3</span></div>
+    <div class="ctab" onclick="setCiclo(3)">4º Ciclo<br><span style="font-size:9px;opacity:.7">Abertura 4</span></div>
+  </div>
+  <div class="info-strip"><i class="ti ti-plate" style="font-size:18px;flex-shrink:0"></i><span id="info_marmitas_txt">—</span></div>
+  <div class="kpi-grid" id="res_kpis"></div>
+  <div class="res-box">
+    <div class="rt" id="res_ciclo_label">Lucro líquido — 1º Ciclo</div>
+    <div class="rv" id="res_lucro">R$ 0</div>
+    <div class="rs" id="res_lucro_sub">por trimestre</div>
+  </div>
+  <div class="card">
+    <div class="card-title"><i class="ti ti-list"></i>DRE — detalhamento do ciclo</div>
+    <div id="dre_rows"></div>
+  </div>
+  <div class="card">
+    <div class="card-title"><i class="ti ti-plate"></i>Lucratividade por refeição</div>
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
+      <div class="kpi"><div class="k-lbl">Receita/refeição</div><div class="k-val gold" id="r_rec">R$0</div><div class="k-sub" id="r_rec_sub"></div></div>
+      <div class="kpi"><div class="k-lbl">Custo/refeição</div><div class="k-val r" id="r_cus">R$0</div></div>
+      <div class="kpi"><div class="k-lbl">Margem</div><div class="k-val" id="r_marg">0%</div></div>
+    </div>
+    <div class="mbar"><div class="mfill" id="mbar_fill" style="width:0%"></div><div class="mtgt" id="mbar_tgt"></div></div>
+    <div style="display:flex;justify-content:space-between;margin-top:5px;font-size:10px;color:var(--t2)"><span>0%</span><span id="mbar_lbl" style="color:var(--yellow)">Meta: 30%</span><span>60%</span></div>
+    <div id="marg_msg"></div>
+  </div>
+  <div class="stitle" style="margin-top:.5rem">Visão anual — 12 meses (4 ciclos)</div>
+  <div class="acc-hero">
+    <div class="ah-label">Faturamento total em 12 meses</div>
+    <div class="ah-val" id="inv_fat_total">R$ 0</div>
+    <div class="ah-sub" id="inv_fat_sub">4 aberturas de carrinho</div>
+  </div>
+  <div class="acc-grid" style="margin-bottom:.85rem">
+    <div class="kpi"><div class="k-lbl">Lucro acumulado</div><div class="k-val" id="inv_lucro">R$0</div></div>
+    <div class="kpi"><div class="k-lbl">Margem líq. anual</div><div class="k-val" id="inv_marg">0%</div></div>
+    <div class="kpi"><div class="k-lbl">Marmitas entregues</div><div class="k-val bl" id="inv_marm">0</div><div class="k-sub" id="inv_marm_sub"></div></div>
+    <div class="kpi"><div class="k-lbl">Assinantes 4º ciclo</div><div class="k-val gold" id="inv_ass">0</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title"><i class="ti ti-chart-bar"></i>Evolução ciclo a ciclo</div>
+    <div class="inv-row hdr"><span>Ciclo</span><span>Assinantes</span><span style="text-align:right">Faturamento</span><span style="text-align:right">Lucro</span><span style="text-align:right">Margem</span></div>
+    <div id="inv_table"></div>
+  </div>
+</div>
+
+<footer>Simulador Financeiro Cariani · Anabolic Food × RC · Configurações salvas localmente no navegador</footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const MC=3;
+const SK='cariani_sim_final';
+const DEF={
+  custo_m:8.50,custo_emb:12,marg_min:30,
+  tog_frete:true,frete:35,tog_taxa:true,taxa_fin:3.5,
+  tog_rc:false,com_rc:5,
+  fixo_op:25000,fixo_mkt:15000,fixo_outros:8000,
+  tog_cac:true,cac_val:120,tog_churn:true,churn_pct:5,ret_pct:80,
+  planos:[{nome:'Starter',marmitas:12,preco_mensal:133},{nome:'Pro',marmitas:20,preco_mensal:200},{nome:'Elite',marmitas:30,preco_mensal:267}],
+  ondas:[{label:'1ª onda',pct:2.5,base:3750},{label:'2ª onda',pct:3.5,base:3750},{label:'3ª onda',pct:5.0,base:3750},{label:'4ª onda',pct:6.5,base:3750}]
+};
+let PL=DEF.planos.map(p=>({...p}));
+let OD=DEF.ondas.map(o=>({...o}));
+let selRes=1,selCiclo=0,saveTimer=null;
+
+function setStatus(msg,type){
+  const el=document.getElementById('save_status');if(!el)return;
+  const icon=type==='ok'?'ti-cloud-check':type==='saving'?'ti-cloud-upload':type==='err'?'ti-cloud-x':'ti-cloud';
+  el.innerHTML=`<i class="ti ${icon}"></i><span>${msg}</span>`;
+  el.className='save-status '+(type||'');
+}
+function triggerAutosave(){
+  clearTimeout(saveTimer);
+  setStatus('Salvando...','saving');
+  saveTimer=setTimeout(()=>saveNow(false),1500);
+}
+function saveNow(manual=false){
+  try{
+    localStorage.setItem(SK,JSON.stringify(getState()));
+    const now=new Date();
+    setStatus('Salvo '+now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),'ok');
+    if(manual)showToast('Configurações salvas!');
+  }catch(e){
+    setStatus('Erro ao salvar','err');
+    if(manual)showToast('Erro ao salvar','err');
+  }
+}
+function loadConfig(){
+  try{
+    const raw=localStorage.getItem(SK);
+    if(raw){
+      const s=JSON.parse(raw);
+      applyState(s);
+      setStatus('Carregado do navegador','ok');
+      showToast('Configurações restauradas!');
+    }else{
+      setStatus('Autosave ativo','ok');
+    }
+  }catch(e){setStatus('Erro ao carregar','err');}
+  calc();
+}
+function resetConfig(){
+  if(!confirm('Restaurar todos os valores padrão?'))return;
+  localStorage.removeItem(SK);
+  PL=DEF.planos.map(p=>({...p}));OD=DEF.ondas.map(o=>({...o}));
+  applyState(DEF);setStatus('Padrões restaurados','ok');showToast('Valores padrão restaurados');calc();
+}
+function showToast(msg,type='ok'){
+  const t=document.getElementById('toast');
+  t.textContent=(type==='ok'?'✓ ':'✗ ')+msg;
+  t.className='toast show '+(type==='ok'?'ok':'err');
+  clearTimeout(t._to);t._to=setTimeout(()=>t.classList.remove('show'),2800);
+}
+function getState(){
+  const n=id=>document.getElementById(id);
+  return{custo_m:parseFloat(n('custo_m').value)||0,custo_emb:parseFloat(n('custo_emb').value)||0,marg_min:parseInt(n('marg_min').value)||30,tog_frete:n('tog_frete').checked,frete:parseFloat(n('frete').value)||0,tog_taxa:n('tog_taxa').checked,taxa_fin:parseFloat(n('taxa_fin').value)||0,tog_rc:n('tog_rc').checked,com_rc:parseFloat(n('com_rc').value)||0,fixo_op:parseFloat(n('fixo_op').value)||0,fixo_mkt:parseFloat(n('fixo_mkt').value)||0,fixo_outros:parseFloat(n('fixo_outros').value)||0,tog_cac:n('tog_cac').checked,cac_val:parseFloat(n('cac_val').value)||0,tog_churn:n('tog_churn').checked,churn_pct:parseFloat(n('churn_pct').value)||0,ret_pct:parseFloat(n('ret_pct').value)||80,planos:PL.map(p=>({...p})),ondas:OD.map(o=>({...o}))};
+}
+function applyState(s){
+  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v;};
+  const setC=(id,v)=>{const e=document.getElementById(id);if(e)e.checked=v;};
+  const setT=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  set('custo_m',s.custo_m);set('custo_emb',s.custo_emb);set('marg_min',s.marg_min);setT('marg_min_v',s.marg_min+'%');
+  setC('tog_frete',s.tog_frete);set('frete',s.frete);
+  setC('tog_taxa',s.tog_taxa);set('taxa_fin',s.taxa_fin);setT('taxa_v',parseFloat(s.taxa_fin).toFixed(1)+'%');
+  setC('tog_rc',s.tog_rc);set('com_rc',s.com_rc);setT('com_rc_v',parseFloat(s.com_rc).toFixed(1)+'%');
+  set('fixo_op',s.fixo_op);set('fixo_mkt',s.fixo_mkt);set('fixo_outros',s.fixo_outros);
+  setC('tog_cac',s.tog_cac);set('cac_val',s.cac_val);
+  setC('tog_churn',s.tog_churn);set('churn_pct',s.churn_pct);setT('churn_v',parseFloat(s.churn_pct).toFixed(1)+'%');
+  set('ret_pct',s.ret_pct);setT('ret_v',s.ret_pct+'%');
+  if(s.planos)PL=s.planos.map(p=>({...p,preco_mensal:p.preco_mensal||(p.preco?Math.round(p.preco/3):133)}));
+  if(s.ondas)OD=s.ondas.map(o=>({...o}));
+}
+function goSec(id){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('sec-'+id).classList.add('on');
+  ['cfg','planos','ondas','resultado'].forEach((s,i)=>{if(s===id)document.querySelectorAll('.ntab')[i].classList.add('on');});
+  calc();
+}
+function setCiclo(i){selCiclo=i;document.querySelectorAll('.ctab').forEach((t,j)=>t.classList.toggle('on',j===i));renderResultado();}
+function fmt(v){return'R$ '+parseFloat(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function fmtK(v){return Math.abs(v)>=1000000?(v<0?'- R$ ':'R$ ')+(Math.abs(v)/1e6).toFixed(2).replace('.',',')+'M':fmt(v)}
+function gv(){return{custoM:parseFloat(document.getElementById('custo_m').value)||0,custoEmb:parseFloat(document.getElementById('custo_emb').value)||0,frete:document.getElementById('tog_frete').checked?(parseFloat(document.getElementById('frete').value)||0):0,taxaFin:document.getElementById('tog_taxa').checked?(parseFloat(document.getElementById('taxa_fin').value)||0)/100:0,comRC:document.getElementById('tog_rc').checked?(parseFloat(document.getElementById('com_rc').value)||0)/100:0,fixo:(parseFloat(document.getElementById('fixo_op').value)||0)+(parseFloat(document.getElementById('fixo_mkt').value)||0)+(parseFloat(document.getElementById('fixo_outros').value)||0),cacVal:document.getElementById('tog_cac').checked?(parseFloat(document.getElementById('cac_val').value)||0):0,churnPct:document.getElementById('tog_churn').checked?(parseFloat(document.getElementById('churn_pct').value)||0)/100:0,margMin:parseInt(document.getElementById('marg_min').value)||30};}
+function precoTri(p){return p.preco_mensal*MC;}
+function marmCiclo(p){return p.marmitas*MC;}
+function calcPlan(v,plan,ass,novos){
+  const tri=precoTri(plan),mc=marmCiclo(plan),fat=ass*tri;
+  const prod=ass*(v.custoM*mc+v.custoEmb*MC);
+  const frt=ass*(v.frete*MC);
+  const tax=fat*v.taxaFin,rc=fat*v.comRC,cac=novos*v.cacVal,fixTri=v.fixo*MC;
+  const lucro=fat-prod-frt-tax-rc-cac-fixTri;
+  const recU=tri/mc,cosU=v.custoM+(v.custoEmb*MC)/mc+(v.frete*MC)/mc+recU*v.taxaFin+recU*v.comRC;
+  const marg=recU>0?((recU-cosU)/recU)*100:0;
+  return{fat,prod,frt,tax,rc,cac,fixTri,lucro,recU,cosU,marg,tri,mc};
+}
+function getTri(){const v=gv(),rt=Math.pow(1-v.churnPct,3);let c=0;return OD.map(o=>{const n=Math.round(o.base*o.pct/100),ret=Math.round(c*rt),perd=c-ret;c=ret+n;return{total:c,novos:n,perdidos:perd};});}
+
+function renderPlanosInputs(){
+  const el=document.getElementById('planos_inputs');if(!el)return;
+  el.innerHTML=PL.map((p,i)=>`
+    <div class="plano-blk">
+      <div class="plano-blk-title">PLANO ${i+1}</div>
+      <label class="lbl">Nome</label>
+      <input class="inp" type="text" value="${p.nome}" oninput="PL[${i}].nome=this.value;calc()">
+      <label class="lbl">Marmitas por mês</label>
+      <div class="sl-row">
+        <input type="range" min="4" max="60" step="2" value="${p.marmitas}" oninput="PL[${i}].marmitas=parseInt(this.value);document.getElementById('mv${i}').textContent=this.value+'/mês ('+parseInt(this.value)*3+'/ciclo)';calc()">
+        <span class="sl-val" id="mv${i}">${p.marmitas}/mês (${p.marmitas*3}/ciclo)</span>
+      </div>
+      <label class="lbl">Preço mensal (R$) — kit trimestral = × 3</label>
+      <div class="sl-row">
+        <input type="range" min="50" max="1000" step="1" value="${p.preco_mensal}" oninput="PL[${i}].preco_mensal=parseInt(this.value);document.getElementById('pv${i}').textContent=fmt(this.value)+'/mês';document.getElementById('tv${i}').textContent='= '+fmt(this.value*3)+'/tri';calc()">
+        <span class="sl-val gold" id="pv${i}">${fmt(p.preco_mensal)}/mês</span>
+      </div>
+      <div style="font-size:12px;color:var(--gold);font-weight:700;margin-top:6px;text-align:right" id="tv${i}">= ${fmt(p.preco_mensal*3)}/tri</div>
+    </div>`).join('');
+}
+function renderPlanosCards(){
+  const el=document.getElementById('planos_cards');if(!el)return;
+  const v=gv(),res=PL.map(p=>calcPlan(v,p,1,1));
+  const bI=res.reduce((bi,r,i)=>r.marg>res[bi].marg?i:bi,0);
+  el.innerHTML=PL.map((p,i)=>{
+    const r=res[i],col=r.marg>=v.margMin?'#22C55E':'#E8242A';
+    const pct=Math.min(Math.max(r.marg,0),60)/60*100,tgt=v.margMin/60*100;
+    const badge=i===bI?'<span class="plan-badge rec">Melhor margem</span>':i===1?'<span class="plan-badge pop">Popular</span>':'';
+    return`<div class="plan-card${i===bI?' best':''}">
+      <div class="plan-ph"><span class="plan-name">${p.nome}</span>${badge}</div>
+      <div style="margin-bottom:.75rem">
+        <div style="font-size:13px;color:var(--t2);font-weight:700"><span style="color:var(--t1);font-size:16px;font-weight:800">${fmt(p.preco_mensal)}</span>/mês</div>
+        <div style="font-size:24px;font-weight:900;color:var(--rc)">${fmt(r.tri)}<span style="font-size:13px;font-weight:600;color:var(--t2)">/tri</span></div>
+        <div style="font-size:11px;color:var(--t2)">${p.marmitas} marm./mês · ${r.mc} marm./ciclo · ${fmt(r.recU)}/refeição</div>
+      </div>
+      <div class="marmita-pill"><i class="ti ti-plate"></i>${r.mc} marmitas/ciclo (${p.marmitas}/mês × 3)</div>
+      <div class="plan-sep"></div>
+      <div class="plan-row"><span>Custo prod./ciclo</span><span>${fmt(v.custoM*r.mc+v.custoEmb*MC)}</span></div>
+      <div class="plan-row" style="font-size:10px"><span style="padding-left:10px;color:var(--t2)">↳ ${r.mc} marm.×${fmt(v.custoM)} + ${MC} emb.×${fmt(v.custoEmb)}</span></div>
+      <div class="plan-row"><span>Custo var./refeição</span><span>${fmt(r.cosU)}</span></div>
+      <div class="plan-row hl"><span>Margem/refeição</span><span style="color:${col}">${r.marg.toFixed(1)}%</span></div>
+      <div class="plan-row hl"><span>Contribuição/ciclo</span><span style="color:${col}">${fmt((r.recU-r.cosU)*r.mc)}</span></div>
+      <div class="mbar" style="margin-top:.85rem"><div class="mfill" style="width:${pct}%;background:${col}">${r.marg.toFixed(1)}%</div><div class="mtgt" style="left:${tgt}%"></div></div>
+    </div>`;
+  }).join('');
+}
+function renderOndas(){
+  const el=document.getElementById('ondas_inputs');if(!el)return;
+  const tri=getTri();
+  el.innerHTML=OD.map((o,i)=>`
+    <div class="wave-item">
+      <div class="wave-hdr"><span class="wave-lbl">${o.label.toUpperCase()}</span><span class="wave-count">${tri[i].total.toLocaleString('pt-BR')} ass.</span></div>
+      <label class="lbl">Base de assinantes</label>
+      <div class="sl-row"><input type="range" min="100" max="20000" step="50" value="${o.base}" oninput="OD[${i}].base=parseInt(this.value);this.nextElementSibling.textContent=parseInt(this.value).toLocaleString('pt-BR');calc()"><span class="sl-val">${o.base.toLocaleString('pt-BR')}</span></div>
+      <label class="lbl">Captação da base</label>
+      <div class="sl-row"><input type="range" min="0.5" max="20" value="${o.pct}" step="0.5" oninput="OD[${i}].pct=parseFloat(this.value);this.nextElementSibling.textContent=parseFloat(this.value).toFixed(1)+'%';calc()"><span class="sl-val">${o.pct.toFixed(1)}%</span></div>
+    </div>`).join('');
+}
+function renderChurn(){
+  const el=document.getElementById('churn_table');if(!el)return;
+  const v=gv(),tri=getTri(),plan=PL[selRes];
+  const ct=v.churnPct*3,ltv=ct>0?precoTri(plan)/ct*3:precoTri(plan)*6,ratio=v.cacVal>0?ltv/v.cacVal:null;
+  const lE=document.getElementById('ltv_val'),rE=document.getElementById('ltv_ratio'),sE=document.getElementById('ltv_sub');
+  if(lE)lE.textContent=fmt(ltv);if(sE)sE.textContent='Plano '+plan.nome;
+  if(rE){rE.textContent=ratio!==null?ratio.toFixed(1)+'x':'∞';rE.className='k-val '+(ratio===null||ratio>=3?'g':'r');}
+  const cols=['#E8242A','#F5A623','#378ADD','#22C55E'];
+  el.innerHTML=tri.map((t,i)=>`<div class="churn-item"><div><div style="font-size:13px;font-weight:800;color:${cols[i]}">${OD[i].label}</div><div style="font-size:11px;color:var(--t2);margin-top:2px">${t.total.toLocaleString('pt-BR')} assinantes</div></div><div class="churn-badges"><span class="cb new">+${t.novos.toLocaleString('pt-BR')}</span>${t.perdidos>0?`<span class="cb lost">-${t.perdidos.toLocaleString('pt-BR')}</span>`:'<span class="cb new">sem churn</span>'}</div></div>`).join('');
+}
+function renderResultado(){
+  const v=gv(),tri=getTri();
+  const tE=document.getElementById('res_plan_tabs');
+  if(tE)tE.innerHTML=PL.map((p,i)=>`<div class="ptab${i===selRes?' on':''}" onclick="selRes=${i};renderResultado()">${p.nome}<br><span style="font-size:10px;opacity:.8">${fmt(p.preco_mensal)}/mês</span></div>`).join('');
+  const plan=PL[selRes],mc=marmCiclo(plan),tc=tri[selCiclo],r=calcPlan(v,plan,tc.total,tc.novos);
+  const mL=r.fat>0?(r.lucro/r.fat*100):0,cL=['1º Ciclo','2º Ciclo','3º Ciclo','4º Ciclo'][selCiclo];
+  const iE=document.getElementById('info_marmitas_txt');
+  if(iE)iE.textContent=`${(tc.total*mc).toLocaleString('pt-BR')} marmitas neste ciclo — ${mc}/ass. (${plan.marmitas}/mês × 3) × ${tc.total.toLocaleString('pt-BR')} assinantes`;
+  const lcE=document.getElementById('res_ciclo_label');if(lcE)lcE.textContent='Lucro líquido — '+cL;
+  const kE=document.getElementById('res_kpis');
+  if(kE)kE.innerHTML=`<div class="kpi"><div class="k-lbl">Assinantes</div><div class="k-val gold">${tc.total.toLocaleString('pt-BR')}</div><div class="k-sub">${cL}</div></div><div class="kpi"><div class="k-lbl">Novos</div><div class="k-val g">+${tc.novos.toLocaleString('pt-BR')}</div><div class="k-sub">captados nesse ciclo</div></div><div class="kpi"><div class="k-lbl">Marmitas ciclo</div><div class="k-val bl">${(tc.total*mc).toLocaleString('pt-BR')}</div><div class="k-sub">${mc}/ass. (${plan.marmitas}×3)</div></div><div class="kpi"><div class="k-lbl">Faturamento</div><div class="k-val">${fmtK(r.fat)}</div><div class="k-sub">${tc.total.toLocaleString('pt-BR')} × ${fmt(r.tri)}</div></div>`;
+  const dE=document.getElementById('dre_rows');
+  if(dE)dE.innerHTML=`<div class="dre-row"><span>Faturamento bruto <span style="color:var(--t2);font-size:10px">(${tc.total.toLocaleString('pt-BR')} × ${fmt(r.tri)})</span></span><span class="pos">${fmt(r.fat)}</span></div><div class="dre-row"><span style="color:var(--t2);font-size:11px">(-) Custo produtos</span><span class="neg">-${fmt(r.prod)}</span></div><div class="dre-row sub"><span style="padding-left:14px">↳ ${tc.total.toLocaleString('pt-BR')} ass. × (${mc} marm.×${fmt(v.custoM)} + ${MC} emb.×${fmt(v.custoEmb)})</span></div>${v.frete>0?`<div class="dre-row"><span style="color:var(--t2);font-size:11px">(-) Frete (${MC} entregas/ciclo)</span><span class="neg">-${fmt(r.frt)}</span></div>`:''}${v.taxaFin>0?`<div class="dre-row"><span style="color:var(--t2);font-size:11px">(-) Taxa financeira</span><span class="neg">-${fmt(r.tax)}</span></div>`:''}${v.comRC>0?`<div class="dre-row"><span style="color:var(--t2);font-size:11px">(-) Comissão RC</span><span class="neg">-${fmt(r.rc)}</span></div>`:''}${v.cacVal>0?`<div class="dre-row"><span style="color:var(--t2);font-size:11px">(-) CAC (${tc.novos.toLocaleString('pt-BR')} novos)</span><span class="neg">-${fmt(r.cac)}</span></div>`:''}<div class="dre-row"><span style="color:var(--t2);font-size:11px">(-) Custos fixos (${MC} meses)</span><span class="neg">-${fmt(r.fixTri)}</span></div><div class="dre-row tot"><span>Lucro líquido</span><span class="${r.lucro>=0?'pos':'neg'}">${fmt(r.lucro)}</span></div>`;
+  const lEl=document.getElementById('res_lucro');if(lEl){lEl.textContent=fmt(r.lucro);lEl.className='rv '+(r.lucro>=0?'g':'r');}
+  const sEl=document.getElementById('res_lucro_sub');if(sEl)sEl.textContent=plan.nome+' · '+fmt(plan.preco_mensal)+'/mês · kit '+fmt(r.tri)+'/tri · '+mc+' marm./ciclo';
+  document.getElementById('r_rec').textContent=fmt(r.recU);
+  const rsE=document.getElementById('r_rec_sub');if(rsE)rsE.textContent=fmt(r.tri)+' ÷ '+mc+' refeições';
+  document.getElementById('r_cus').textContent=fmt(r.cosU);
+  const mEl=document.getElementById('r_marg');if(mEl){mEl.textContent=r.marg.toFixed(1)+'%';mEl.className='k-val '+(r.marg>=v.margMin?'g':'r');}
+  const mf=document.getElementById('mbar_fill'),mt=document.getElementById('mbar_tgt'),ml=document.getElementById('mbar_lbl');
+  const pct=Math.min(Math.max(r.marg,0),60)/60*100,tgt=v.margMin/60*100;
+  if(mf){mf.style.width=pct+'%';mf.style.background=r.marg>=v.margMin?'#22C55E':'#E8242A';mf.textContent=r.marg.toFixed(1)+'%';}
+  if(mt)mt.style.left=tgt+'%';if(ml)ml.textContent='Meta: '+v.margMin+'%';
+  const msgEl=document.getElementById('marg_msg');
+  if(msgEl){if(r.marg<v.margMin){const pN=r.cosU/(1-v.margMin/100);msgEl.innerHTML=`<div class="warn"><i class="ti ti-alert-triangle"></i>Abaixo da meta. Preço mínimo: <strong>${fmt(pN*mc/MC)}/mês</strong> (${fmt(pN*mc)}/tri)</div>`;}else msgEl.innerHTML=`<div class="succ"><i class="ti ti-check"></i>Meta atingida! Contribuição: <strong>${fmt((r.recU-r.cosU)*mc)}</strong>/ciclo por assinante</div>`;}
+  let aF=0,aL=0,aM=0;
+  const maxF=Math.max(...tri.map(t=>calcPlan(v,plan,t.total,t.novos).fat));
+  const rows=tri.map((t,i)=>{const ra=calcPlan(v,plan,t.total,t.novos);aF+=ra.fat;aL+=ra.lucro;aM+=t.total*mc;const bp=maxF>0?Math.round(ra.fat/maxF*100):0,lc=ra.lucro>=0?'#22C55E':'#E8242A',ml2=ra.fat>0?(ra.lucro/ra.fat*100):0,iS=i===selCiclo;return`<div class="inv-row" style="${iS?'background:rgba(232,36,42,.07);border-radius:6px;padding-left:6px;padding-right:6px;':''}"><span style="font-weight:800;color:${iS?'var(--rc)':'var(--t1)'}">Ciclo ${i+1}</span><div><div class="inv-bar-bg"><div class="inv-bar-f" style="width:${bp}%;background:${lc}"></div></div><div style="font-size:10px;color:var(--t2);margin-top:2px">${t.total.toLocaleString('pt-BR')} ass. · ${(t.total*mc).toLocaleString('pt-BR')} marm.</div></div><span style="text-align:right;font-size:11px">${fmtK(ra.fat)}</span><span style="text-align:right;font-size:11px;color:${lc};font-weight:700">${fmtK(ra.lucro)}</span><span style="text-align:right;font-size:11px;color:${ml2>=0?'var(--green)':'var(--rc)'}">${ml2.toFixed(1)}%</span></div>`;}).join('');
+  const tbl=document.getElementById('inv_table');if(tbl)tbl.innerHTML=rows;
+  const mA=aF>0?(aL/aF*100):0;
+  const fE=document.getElementById('inv_fat_total'),lE2=document.getElementById('inv_lucro'),mE=document.getElementById('inv_marg'),mmE=document.getElementById('inv_marm'),mmS=document.getElementById('inv_marm_sub'),aE=document.getElementById('inv_ass'),s2=document.getElementById('inv_fat_sub');
+  if(fE)fE.textContent=fmtK(aF);
+  if(s2)s2.textContent='4 ciclos · '+plan.nome+' · '+fmt(plan.preco_mensal)+'/mês · kit '+fmt(precoTri(plan))+'/tri';
+  if(lE2){lE2.textContent=fmtK(aL);lE2.className='k-val '+(aL>=0?'gold':'r');}
+  if(mE){mE.textContent=mA.toFixed(1)+'%';mE.className='k-val '+(mA>=0?'g':'r');}
+  if(mmE)mmE.textContent=aM.toLocaleString('pt-BR');
+  if(mmS)mmS.textContent=mc+' marm./ass./ciclo × 4 ciclos';
+  if(aE)aE.textContent=tri[3].total.toLocaleString('pt-BR');
+}
+function calc(){
+  renderPlanosInputs();renderPlanosCards();renderOndas();renderChurn();renderResultado();
+  triggerAutosave();
+}
+loadConfig();
+</script>
+</body>
+</html>
