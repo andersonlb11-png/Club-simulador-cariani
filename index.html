@@ -456,95 +456,7 @@ function saveNow(manual=false){
   }catch(e){setStatus('Erro ao salvar','err');if(manual)showToast('Erro ao salvar','err');}
 }
 
-async function shareLink(){
-  const state = getState();
-  state.planos = PL.map(p=>({...p}));
-  state.ondas = OD.map(o=>({...o}));
-  try{
-    const json = JSON.stringify(state);
-    const b64 = btoa(unescape(encodeURIComponent(json)));
-    const longUrl = window.location.href.split('?')[0] + '?cfg=' + b64;
-    
-    // Mostrar modal de compartilhamento
-    showShareModal(longUrl);
-  }catch(e){showToast('Erro ao gerar link','err');}
-}
 
-async function encurtarLink(longUrl){
-  try{
-    const resp = await fetch('https://tinyurl.com/api-create.php?url=' + encodeURIComponent(longUrl));
-    if(resp.ok){
-      const short = await resp.text();
-      if(short.startsWith('https://')||short.startsWith('http://')) return short;
-    }
-  }catch(e){}
-  return null;
-}
-
-function showShareModal(longUrl){
-  // Criar modal de compartilhamento
-  const existing = document.getElementById('share_modal');
-  if(existing) existing.remove();
-  
-  const modal = document.createElement('div');
-  modal.id = 'share_modal';
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9998;display:flex;align-items:center;justify-content:center;padding:1rem';
-  modal.innerHTML = \`
-    <div style="background:#1C1C1C;border:1px solid rgba(255,255,255,.09);border-radius:16px;padding:1.5rem;width:100%;max-width:420px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem">
-        <h3 style="font-size:15px;font-weight:800">Compartilhar simulação</h3>
-        <button onclick="document.getElementById('share_modal').remove()" style="background:transparent;border:none;color:#909090;font-size:22px;cursor:pointer;line-height:1">×</button>
-      </div>
-      <div id="share_loading" style="text-align:center;padding:1.5rem 0;color:#909090;font-size:13px">
-        <div style="width:24px;height:24px;border:2px solid #333;border-top-color:#E8242A;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 10px"></div>
-        Gerando link curto...
-      </div>
-      <div id="share_content" style="display:none">
-        <div style="background:#252525;border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;margin-bottom:1rem">
-          <span id="share_url_display" style="flex:1;font-size:13px;font-weight:700;color:#F2F2F2;word-break:break-all"></span>
-          <button onclick="copyShortLink()" style="background:#E8242A;color:#fff;border:none;border-radius:8px;padding:8px 12px;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;flex-shrink:0">COPIAR</button>
-        </div>
-        <button onclick="shareWhatsApp()" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:10px;padding:14px;font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:.65rem">
-          <i class="ti ti-brand-whatsapp" style="font-size:20px"></i> ENVIAR PELO WHATSAPP
-        </button>
-        <button onclick="copyShortLink()" style="width:100%;background:transparent;border:1px solid rgba(255,255,255,.1);color:#909090;border-radius:10px;padding:13px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
-          <i class="ti ti-copy"></i> COPIAR LINK
-        </button>
-      </div>
-    </div>
-    <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
-  \`;
-  document.body.appendChild(modal);
-  modal.addEventListener('click', e=>{ if(e.target===modal) modal.remove(); });
-  
-  // Encurtar o link
-  encurtarLink(longUrl).then(shortUrl => {
-    window._shareUrl = shortUrl || longUrl;
-    document.getElementById('share_loading').style.display = 'none';
-    document.getElementById('share_content').style.display = 'block';
-    const display = shortUrl || longUrl;
-    document.getElementById('share_url_display').textContent = display;
-  });
-}
-
-function copyShortLink(){
-  const url = window._shareUrl;
-  if(!url) return;
-  navigator.clipboard.writeText(url).then(()=>{
-    showToast('✓ Link copiado!');
-    document.getElementById('share_modal')?.remove();
-  }).catch(()=>{
-    prompt('Copie o link:', url);
-  });
-}
-
-function shareWhatsApp(){
-  const url = window._shareUrl;
-  if(!url) return;
-  const texto = encodeURIComponent('Olha a simulação financeira do Club Cariani que montei:\n\n' + url);
-  window.open('https://wa.me/?text=' + texto, '_blank');
-  document.getElementById('share_modal')?.remove();
-}
 
 function loadFromURL(){
   const params = new URLSearchParams(window.location.search);
@@ -563,6 +475,86 @@ function loadFromURL(){
     console.error('Erro ao carregar config da URL:',e);
     return false;
   }
+}
+
+
+async function shareLink(){
+  var state=getState();
+  state.planos=PL.map(function(p){return Object.assign({},p);});
+  state.ondas=OD.map(function(o){return Object.assign({},o);});
+  try{
+    var json=JSON.stringify(state);
+    var b64=btoa(unescape(encodeURIComponent(json)));
+    var longUrl=window.location.href.split('?')[0]+'?cfg='+b64;
+    showShareModal(longUrl);
+  }catch(e){showToast('Erro ao gerar link','err');}
+}
+
+async function encurtarLink(longUrl){
+  try{
+    var resp=await fetch('https://tinyurl.com/api-create.php?url='+encodeURIComponent(longUrl));
+    if(resp.ok){
+      var short=await resp.text();
+      if(short.indexOf('https://')===0||short.indexOf('http://')===0) return short.trim();
+    }
+  }catch(e){}
+  return null;
+}
+
+function showShareModal(longUrl){
+  var existing=document.getElementById('share_modal');
+  if(existing)existing.remove();
+  var modal=document.createElement('div');
+  modal.id='share_modal';
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9998;display:flex;align-items:center;justify-content:center;padding:1rem';
+  var html='';
+  html+='<div style="background:#1C1C1C;border:1px solid rgba(255,255,255,.09);border-radius:16px;padding:1.5rem;width:100%;max-width:420px">';
+  html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem">';
+  html+='<h3 style="font-size:15px;font-weight:800">Compartilhar simulação</h3>';
+  html+='<button onclick="document.getElementById(\'share_modal\').remove()" style="background:transparent;border:none;color:#909090;font-size:22px;cursor:pointer;line-height:1">×</button>';
+  html+='</div>';
+  html+='<div id="share_loading" style="text-align:center;padding:1.5rem 0;color:#909090;font-size:13px">';
+  html+='<div style="width:24px;height:24px;border:2px solid #333;border-top-color:#E8242A;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 10px"></div>';
+  html+='Gerando link curto...</div>';
+  html+='<div id="share_content" style="display:none">';
+  html+='<div style="background:#252525;border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;margin-bottom:1rem">';
+  html+='<span id="share_url_txt" style="flex:1;font-size:13px;font-weight:700;color:#F2F2F2;word-break:break-all"></span>';
+  html+='<button onclick="copyShortLink()" style="background:#E8242A;color:#fff;border:none;border-radius:8px;padding:8px 12px;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;flex-shrink:0">COPIAR</button>';
+  html+='</div>';
+  html+='<button onclick="shareWhatsApp()" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:10px;padding:14px;font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:.65rem">';
+  html+='<i class="ti ti-brand-whatsapp" style="font-size:20px"></i> ENVIAR PELO WHATSAPP</button>';
+  html+='<button onclick="copyShortLink()" style="width:100%;background:transparent;border:1px solid rgba(255,255,255,.1);color:#909090;border-radius:10px;padding:13px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">';
+  html+='<i class="ti ti-copy"></i> COPIAR LINK</button>';
+  html+='</div></div>';
+  html+='<style>@keyframes spin{to{transform:rotate(360deg)}}</style>';
+  modal.innerHTML=html;
+  document.body.appendChild(modal);
+  modal.addEventListener('click',function(e){if(e.target===modal)modal.remove();});
+  encurtarLink(longUrl).then(function(shortUrl){
+    window._shareUrl=shortUrl||longUrl;
+    document.getElementById('share_loading').style.display='none';
+    document.getElementById('share_content').style.display='block';
+    document.getElementById('share_url_txt').textContent=shortUrl||longUrl;
+  });
+}
+
+function copyShortLink(){
+  var url=window._shareUrl;
+  if(!url)return;
+  navigator.clipboard.writeText(url).then(function(){
+    showToast('✓ Link copiado!');
+    var m=document.getElementById('share_modal');
+    if(m)m.remove();
+  }).catch(function(){prompt('Copie o link:',url);});
+}
+
+function shareWhatsApp(){
+  var url=window._shareUrl;
+  if(!url)return;
+  var texto=encodeURIComponent('Olha a simulação financeira do Club Cariani que montei:\n\n'+url);
+  window.open('https://wa.me/?text='+texto,'_blank');
+  var m=document.getElementById('share_modal');
+  if(m)m.remove();
 }
 
 function loadConfig(){
