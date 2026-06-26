@@ -445,10 +445,14 @@ function triggerAutosave(){
 }
 function saveNow(manual=false){
   try{
-    localStorage.setItem(SK,JSON.stringify(getState()));
+    const state=getState();
+    // Garantir que planos e ondas estão no estado
+    state.planos=PL.map(p=>({...p}));
+    state.ondas=OD.map(o=>({...o}));
+    localStorage.setItem(SK,JSON.stringify(state));
     const now=new Date();
     setStatus('Salvo '+now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),'ok');
-    if(manual)showToast('Configurações salvas!');
+    if(manual)showToast('✓ Configurações salvas! Ao recarregar tudo volta.');
   }catch(e){setStatus('Erro ao salvar','err');if(manual)showToast('Erro ao salvar','err');}
 }
 
@@ -486,19 +490,22 @@ function loadFromURL(){
 }
 
 function loadConfig(){
-  // Primeiro tenta carregar da URL (compartilhamento)
-  if(loadFromURL()){
-    calc();
-    return;
+  // 1. Se tem ?cfg= na URL, carrega dela (link compartilhado)
+  if(window.location.search.includes('cfg=')){
+    if(loadFromURL()){calc();return;}
   }
-  // Senão carrega do localStorage local
-  // Primeiro tenta URL compartilhada
-  if(loadFromURL()){calc();return;}
-  // Senão carrega localStorage
+  // 2. Senão carrega do localStorage (salvo localmente)
   try{
     const raw=localStorage.getItem(SK);
-    if(raw){applyState(JSON.parse(raw));setStatus('Carregado do navegador','ok');showToast('Configurações restauradas!');}
-    else setStatus('Autosave ativo','ok');
+    if(raw){
+      const parsed=JSON.parse(raw);
+      applyState(parsed);
+      if(parsed.planos)PL=parsed.planos.map(p=>({...p}));
+      if(parsed.ondas)OD=parsed.ondas.map(o=>({...o}));
+      setStatus('Configuração restaurada ✓','ok');
+    } else {
+      setStatus('Autosave ativo','ok');
+    }
   }catch(e){setStatus('Erro ao carregar','err');}
   calc();
 }
