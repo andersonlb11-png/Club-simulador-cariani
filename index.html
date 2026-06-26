@@ -178,6 +178,7 @@ footer{text-align:center;font-size:11px;color:var(--t2);margin-top:2rem;padding-
       <button class="btn-pdf" onclick="window.print()"><i class="ti ti-file-type-pdf"></i> PDF</button>
       <button class="btn-save" onclick="saveNow(true)"><i class="ti ti-device-floppy"></i> Salvar</button>
     </div>
+
     <div class="save-status ok" id="save_status"><i class="ti ti-cloud-check"></i><span>Pronto</span></div>
   </div>
 </div>
@@ -824,5 +825,17 @@ function calc(){
 }
 loadConfig();
 </script>
+
+<!-- Link discreto App do Cliente -->
+<style>
+.club-link{position:fixed;bottom:20px;right:16px;z-index:100;display:flex;align-items:center;gap:7px;background:var(--s1);border:1px solid var(--bdr);border-radius:8px;padding:9px 14px;text-decoration:none;color:var(--t2);font-size:11px;font-weight:700;letter-spacing:.5px;box-shadow:0 2px 16px rgba(0,0,0,.4);transition:all .2s}
+.club-link:hover{border-color:var(--rc);color:var(--t1)}
+.club-link i{font-size:15px;color:var(--rc)}
+.club-link .cl-sub{font-size:9px;font-weight:500;color:var(--t2);display:block;margin-top:1px;letter-spacing:.3px}
+</style>
+<a class="club-link" href="cariani-club.html" target="_blank">
+  <i class="ti ti-users"></i>
+  <div><span>App do Cliente</span><span class="cl-sub">Quiz · Plano ideal</span></div>
+</a>
 </body>
 </html>
