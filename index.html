@@ -160,7 +160,16 @@ input:checked+.tsl:before{transform:translateX(18px)}
 .toast.ok{color:var(--green);border-color:rgba(34,197,94,.3)}
 .toast.err{color:var(--rc);border-color:rgba(232,36,42,.3)}
 footer{text-align:center;font-size:11px;color:var(--t2);margin-top:2rem;padding-top:1rem;border-top:1px solid var(--bdr)}
-@media print{.nav,.hdr-right,.toast,footer,button{display:none!important}.sec{display:block!important}body{background:#fff;color:#000;padding:0}.card{border:1px solid #ddd;break-inside:avoid}}
+@media print{
+  .nav,.hdr-right,.toast,footer,button,.club-link,.fab-club,.modal-overlay{display:none!important}
+  /* Mostrar APENAS a seção ativa, não todas */
+  .sec{display:none!important}
+  .sec.on{display:block!important}
+  body{background:#fff;color:#000;padding:0}
+  .card{border:1px solid #ddd;break-inside:avoid;page-break-inside:avoid}
+  .hdr{border:none;padding:.5rem 0}
+  .kpi{border:1px solid #eee}
+}
 </style>
 </head>
 <body>
@@ -442,6 +451,40 @@ function saveNow(manual=false){
     if(manual)showToast('Configurações salvas!');
   }catch(e){setStatus('Erro ao salvar','err');if(manual)showToast('Erro ao salvar','err');}
 }
+
+function shareLink(){
+  const state = getState();
+  try{
+    const json = JSON.stringify(state);
+    const b64 = btoa(unescape(encodeURIComponent(json)));
+    const url = window.location.href.split('?')[0] + '?cfg=' + b64;
+    navigator.clipboard.writeText(url).then(()=>{
+      showToast('✓ Link copiado! Qualquer pessoa que abrir verá sua configuração.');
+    }).catch(()=>{
+      prompt('Copie este link:', url);
+    });
+  }catch(e){showToast('Erro ao gerar link','err');}
+}
+
+function loadFromURL(){
+  const params = new URLSearchParams(window.location.search);
+  const cfg = params.get('cfg');
+  if(!cfg) return false;
+  try{
+    const json = decodeURIComponent(escape(atob(cfg)));
+    const state = JSON.parse(json);
+    applyState(state);
+    if(state.planos) PL = state.planos.map(p=>({...p}));
+    if(state.ondas) OD = state.ondas.map(o=>({...o}));
+    setStatus('Configuração carregada do link ✓','ok');
+    showToast('✓ Configuração carregada do link compartilhado!');
+    return true;
+  }catch(e){
+    console.error('Erro ao carregar config da URL:',e);
+    return false;
+  }
+}
+
 function loadConfig(){
   // Primeiro tenta carregar da URL (compartilhamento)
   if(loadFromURL()){
@@ -449,6 +492,9 @@ function loadConfig(){
     return;
   }
   // Senão carrega do localStorage local
+  // Primeiro tenta URL compartilhada
+  if(loadFromURL()){calc();return;}
+  // Senão carrega localStorage
   try{
     const raw=localStorage.getItem(SK);
     if(raw){applyState(JSON.parse(raw));setStatus('Carregado do navegador','ok');showToast('Configurações restauradas!');}
